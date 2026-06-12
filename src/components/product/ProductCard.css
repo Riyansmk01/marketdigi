@@ -1,0 +1,154 @@
+.product-card {
+  background-color: var(--bg-secondary);
+  border-radius: 1.5rem; /* rounded-3xl */
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  transition: transform var(--transition-bounce), box-shadow 0.3s, border-color 0.3s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .product-card {
+    border-color: var(--glass-border);
+  }
+}
+
+.product-card:hover {
+  transform: translateY(-6px) scale(1.005);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
+  border-color: var(--glass-border-hover);
+}
+
+.card-img-placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.95);
+  overflow: hidden;
+  position: relative;
+}
+
+.card-img-placeholder::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 80%);
+  pointer-events: none;
+}
+
+.card-img-placeholder svg {
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
+  transition: transform var(--transition-bounce);
+}
+
+.product-card:hover .card-img-placeholder svg {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.card-content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-badges {
+  margin-bottom: 0.6rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 700; /* judul tebal */
+  margin-bottom: 0.4rem;
+  line-height: 1.4;
+  color: var(--text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 3rem;
+}
+
+.card-rating-sold {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.card-rating-sold .rating-star {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-price {
+  font-size: 1.25rem; /* harga besar */
+  font-weight: 800;
+  color: var(--accent-color); /* warna biru/ungu */
+  margin-bottom: 1rem;
+  margin-top: auto;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--glass-border);
+  padding-top: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.seller-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.fulfillment-type {
+  opacity: 0.8;
+}
+
+.divider {
+  color: var(--glass-border-hover);
+}
+
+.card-cta {
+  width: 100%;
+}
+
+.cta-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.product-card:hover .cta-button {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
