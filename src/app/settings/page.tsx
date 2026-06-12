@@ -69,11 +69,12 @@ export default function SettingsPage() {
 
           // Then confirm from DB (users table, not profiles)
           try {
-            const { data: userData } = await supabase
+            const { data: userDataResult } = await supabase
               .from('users')
               .select('role')
               .eq('id', user.id)
-              .single()
+            
+            const userData = Array.isArray(userDataResult) ? userDataResult[0] : null
             
             if (userData && userData.role) {
               if (user.email === 'perdhanariyan@gmail.com') {

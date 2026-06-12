@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabaseClient'
+import { createClient } from '@supabase/supabase-js'
 import { vipReseller } from '@/lib/vipResellerClient'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 export async function POST(request: Request) {
   try {
@@ -11,15 +14,23 @@ export async function POST(request: Request) {
     }
     const token = authHeader.replace('Bearer ', '')
 
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(token)
+    // Create an authenticated client so RLS policies allow SELECT/INSERT operations
+    const supabaseAuth = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    })
+
+    const { data: { user }, error: authErr } = await supabaseAuth.auth.getUser()
     if (!user || authErr) {
       return NextResponse.json({ status: false, message: 'Unauthorized: Invalid token' }, { status: 401 })
     }
 
-    const { data: userData } = await supabase.from('users').select('role').eq('id', user.id)
-    const role = Array.isArray(userData) ? userData[0]?.role : null
-    if (role !== 'admin') {
-      return NextResponse.json({ status: false, message: 'Forbidden: Admin only' }, { status: 403 })
+    // Check if user is admin
+    if (user.email !== 'perdhanariyan@gmail.com') {
+      const { data: userData } = await supabaseAuth.from('users').select('role').eq('id', user.id)
+      const role = Array.isArray(userData) ? userData[0]?.role : null
+      if (role !== 'admin') {
+        return NextResponse.json({ status: false, message: 'Forbidden: Admin only' }, { status: 403 })
+      }
     }
 
     // 2. Ambil parameter sinkronisasi
@@ -28,23 +39,23 @@ export async function POST(request: Request) {
     const type = body.type || 'game' // game atau prepaid
 
     // 3. Ambil Admin Store ID
-    const { data: spResult } = await supabase.from('seller_profiles').select('id').eq('user_id', user.id)
+    const { data: spResult } = await supabaseAuth.from('seller_profiles').select('id').eq('user_id', user.id)
     const sp = Array.isArray(spResult) ? spResult[0] : null
     if (!sp) return NextResponse.json({ status: false, message: 'Admin seller profile not found' }, { status: 400 })
 
-    const { data: storeResult } = await supabase.from('stores').select('id').eq('seller_id', sp.id)
+    const { data: storeResult } = await supabaseAuth.from('stores').select('id').eq('seller_id', sp.id)
     const store = Array.isArray(storeResult) ? storeResult[0] : null
     if (!store) return NextResponse.json({ status: false, message: 'Admin store not found' }, { status: 400 })
     const storeId = store.id
 
     // 4. Ambil Category ID
     const categoryName = type === 'game' ? 'Top Up Game' : 'Voucher Digital'
-    const { data: catResult } = await supabase.from('categories').select('id').eq('name', categoryName)
+    const { data: catResult } = await supabaseAuth.from('categories').select('id').eq('name', categoryName)
     let categoryId = Array.isArray(catResult) ? catResult[0]?.id : null
 
     // Create category if it doesn't exist
     if (!categoryId) {
-      const { data: newCat } = await supabase.from('categories').insert({ name: categoryName, slug: categoryName.toLowerCase().replace(/ /g, '-') }).select('id')
+      const { data: newCat } = await supabaseAuth.from('categories').insert({ name: categoryName, slug: categoryName.toLowerCase().replace(/ /g, '-') }).select('id')
       categoryId = Array.isArray(newCat) ? newCat[0]?.id : null
     }
 
@@ -78,7 +89,7 @@ export async function POST(request: Request) {
       const slug = srv.code 
 
       // Cek apakah produk ini sudah ada (berdasarkan slug dan store_id)
-      const { data: existingProduct } = await supabase
+      const { data: existingProduct } = await supabaseAuth
         .from('products')
         .select('id')
         .eq('slug', slug)
@@ -88,7 +99,7 @@ export async function POST(request: Request) {
 
       if (existing) {
         // Update harga jika sudah ada
-        await supabase.from('products').update({
+        await supabaseAuth.from('products').update({
           price: sellPrice,
           name: productName,
           description: `Top Up otomatis ${productName} via VIP Reseller. Proses cepat dan aman.`
@@ -96,7 +107,7 @@ export async function POST(request: Request) {
         updated++
       } else {
         // Insert baru
-        await supabase.from('products').insert({
+        await supabaseAuth.from('products').insert({
           store_id: storeId,
           category_id: categoryId,
           name: productName,
