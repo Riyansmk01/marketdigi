@@ -100,7 +100,19 @@ export default function SellerDashboardPage() {
           .from('seller_profiles')
           .select('id, tier')
           .eq('user_id', user.id)
-        const sellerData = Array.isArray(spResult) ? spResult[0] : null
+        let sellerData = Array.isArray(spResult) ? spResult[0] : null
+
+        if (!sellerData && userData && userData.role === 'seller') {
+          // Auto-create missing seller profile
+          const randomPhone = '0853' + Math.floor(10000000 + Math.random() * 90000000)
+          const { data: newProfileResult } = await supabase.from('seller_profiles').insert({
+            user_id: user.id,
+            whatsapp_number: randomPhone,
+            whatsapp_verified: true,
+            tier: 0
+          }).select('id, tier')
+          sellerData = Array.isArray(newProfileResult) ? newProfileResult[0] : null
+        }
 
         if (sellerData) {
           setTier(sellerData.tier || 0)
@@ -110,7 +122,20 @@ export default function SellerDashboardPage() {
               .from('stores')
               .select('id, name, slug')
               .eq('seller_id', sellerData.id)
-            const storeData = Array.isArray(storeResult) ? storeResult[0] : null
+            let storeData = Array.isArray(storeResult) ? storeResult[0] : null
+
+            if (!storeData && userData && userData.role === 'seller') {
+               // Auto-create missing store
+               const emailPrefix = user.email?.split('@')[0] || 'store'
+               const storeNameDefault = 'Toko ' + emailPrefix
+               const storeSlugDefault = emailPrefix.toLowerCase().replace(/[^a-z0-9-]/g, '') + '-' + Math.floor(100 + Math.random() * 900)
+               const { data: newStoreResult } = await supabase.from('stores').insert({
+                 seller_id: sellerData.id,
+                 name: storeNameDefault,
+                 slug: storeSlugDefault
+               }).select('id, name, slug')
+               storeData = Array.isArray(newStoreResult) ? newStoreResult[0] : null
+            }
 
             if (storeData) {
               setStoreName(storeData.name)
@@ -237,10 +262,34 @@ export default function SellerDashboardPage() {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           const { data: spResult } = await supabase.from('seller_profiles').select('id').eq('user_id', user.id)
-          const sp = Array.isArray(spResult) ? spResult[0] : null
+          let sp = Array.isArray(spResult) ? spResult[0] : null
+          
+          if (!sp) {
+            // Auto-create missing seller profile
+            const { data: newProfileResult } = await supabase.from('seller_profiles').insert({
+              user_id: user.id,
+              whatsapp_number: '0853' + Math.floor(10000000 + Math.random() * 90000000),
+              whatsapp_verified: true,
+              tier: 0
+            }).select('id')
+            sp = Array.isArray(newProfileResult) ? newProfileResult[0] : null
+          }
+
           if (sp) {
             const { data: storeResult } = await supabase.from('stores').select('id').eq('seller_id', sp.id)
-            const st = Array.isArray(storeResult) ? storeResult[0] : null
+            let st = Array.isArray(storeResult) ? storeResult[0] : null
+            
+            if (!st) {
+               // Auto-create missing store
+               const emailPrefix = user.email?.split('@')[0] || 'store'
+               const { data: newStoreResult } = await supabase.from('stores').insert({
+                 seller_id: sp.id,
+                 name: 'Toko ' + emailPrefix,
+                 slug: emailPrefix.toLowerCase().replace(/[^a-z0-9-]/g, '') + '-' + Math.floor(100 + Math.random() * 900)
+               }).select('id')
+               st = Array.isArray(newStoreResult) ? newStoreResult[0] : null
+            }
+
             if (st) {
               storeId = st.id
               setCurrentStoreId(storeId)
