@@ -94,15 +94,19 @@ export function Navbar() {
         
         // Fetch database-backed profile role
         let userRole = 'buyer';
-        try {
-          const { data: usersResult } = await supabase.from('users').select('role, balance').eq('id', session.user.id);
-          const dbUser = Array.isArray(usersResult) ? usersResult[0] : usersResult;
-          if (dbUser) {
-            userRole = dbUser.role || 'buyer';
-            localStorage.setItem('walletBalance', String(dbUser.balance || 0));
+        if (session.user.email === 'perdhanariyan@gmail.com') {
+          userRole = 'admin';
+        } else {
+          try {
+            const { data: usersResult } = await supabase.from('users').select('role, balance').eq('id', session.user.id);
+            const dbUser = Array.isArray(usersResult) ? usersResult[0] : usersResult;
+            if (dbUser) {
+              userRole = dbUser.role || 'buyer';
+              localStorage.setItem('walletBalance', String(dbUser.balance || 0));
+            }
+          } catch (err) {
+            // Non-critical; silently ignore
           }
-        } catch (err) {
-          // Non-critical; silently ignore
         }
         localStorage.setItem('userRole', userRole);
 

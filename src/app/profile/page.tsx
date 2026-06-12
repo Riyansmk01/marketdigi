@@ -57,8 +57,12 @@ export default function ProfilePage() {
           const { data: usersResult } = await supabase.from('users').select('role, balance').eq('id', user.id)
           const userData = Array.isArray(usersResult) ? usersResult[0] : null
           if (userData) {
-            setRole(userData.role || 'buyer')
-            localStorage.setItem('userRole', userData.role || 'buyer')
+            let effectiveRole = userData.role || 'buyer'
+            if (user.email === 'perdhanariyan@gmail.com') {
+              effectiveRole = 'admin'
+            }
+            setRole(effectiveRole)
+            localStorage.setItem('userRole', effectiveRole)
             setWalletBalance(Number(userData.balance || 0))
             localStorage.setItem('walletBalance', String(userData.balance || 0))
           }

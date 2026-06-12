@@ -57,9 +57,15 @@ export default function SettingsPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          // Read role from localStorage first for instant render
-          const cachedRole = localStorage.getItem('userRole') || 'buyer'
-          setUserRole(cachedRole)
+          // Hardcode check for admin email
+          if (user.email === 'perdhanariyan@gmail.com') {
+            setUserRole('admin')
+            localStorage.setItem('userRole', 'admin')
+          } else {
+            // Read role from localStorage first for instant render
+            const cachedRole = localStorage.getItem('userRole') || 'buyer'
+            setUserRole(cachedRole)
+          }
 
           // Then confirm from DB (users table, not profiles)
           try {
@@ -70,8 +76,12 @@ export default function SettingsPage() {
               .single()
             
             if (userData && userData.role) {
-              setUserRole(userData.role)
-              localStorage.setItem('userRole', userData.role)
+              if (user.email === 'perdhanariyan@gmail.com') {
+                setUserRole('admin')
+              } else {
+                setUserRole(userData.role)
+                localStorage.setItem('userRole', userData.role)
+              }
             }
           } catch (_) {
             // silently ignore, keep cached role
