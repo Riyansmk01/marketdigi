@@ -117,6 +117,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
   const [hasPurchased, setHasPurchased] = useState(false)
   const [userRole, setUserRole] = useState('buyer')
   const [sellerStats, setSellerStats] = useState({ ratingAvg: 5.0, reviewCount: 0 })
+  const [isProcessingBuy, setIsProcessingBuy] = useState(false)
 
   // Review Form States
   const [ratingVal, setRatingVal] = useState(5)
@@ -304,32 +305,54 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
   const productPrice = isWindows && selectedVariant === 'Home' ? product.price - 30000 : Number(product.price || 0)
   const totalPrice = productPrice * qty
 
-  const handleBuyNow = () => {
-    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
-    const newOrder = {
-      id: 'ord_' + Math.random().toString(36).substr(2, 9),
-      invoiceNo: 'INV-' + new Date().getFullYear() + (new Date().getMonth() + 1).toString().padStart(2, '0') + new Date().getDate().toString().padStart(2, '0') + '-' + Math.floor(1000 + Math.random() * 9000),
-      items: [
-        {
-          id: product.id,
-          title: productNameDisplay + (selectedVariant ? ` (${selectedVariant})` : ''),
-          price: productPrice,
-          qty: qty,
-          variant: selectedVariant,
-          note: note,
-          icon: theme.iconText === 'Windows' ? '💻' : theme.iconText === 'Netflix' ? '📺' : theme.iconText === 'Spotify' ? '🎵' : theme.iconText === 'Canva' ? '🎨' : '📦'
-        }
-      ],
-      subtotal: totalPrice,
-      serviceFee: 2500,
-      total: totalPrice + 2500,
-      paymentMethod: 'QRIS',
-      status: 'Proses',
-      createdAt: new Date().toISOString()
-    }
+  const handleBuyNow = async () => {
+    setIsProcessingBuy(true)
+    try {
+      const items = [{
+        id: product.id,
+        title: productNameDisplay + (selectedVariant ? ` (${selectedVariant})` : ''),
+        price: productPrice,
+        qty: qty,
+        variant: selectedVariant,
+        note: note,
+        icon: theme.iconText === 'Windows' ? '💻' : theme.iconText === 'Netflix' ? '📺' : theme.iconText === 'Spotify' ? '🎵' : theme.iconText === 'Canva' ? '🎨' : '📦'
+      }]
 
-    localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]))
-    router.push(`/checkout/${newOrder.id}`)
+      const response = await fetch('/api/orders/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items,
+          subtotal: totalPrice,
+          serviceFee: 2500,
+          total: totalPrice + 2500,
+          paymentMethod: 'QRIS'
+        })
+      })
+
+      const result = await response.json()
+      
+      if (!response.ok || !result.status) {
+        if (response.status === 401) {
+          toast.error('Silakan login terlebih dahulu untuk checkout.')
+          router.push('/login')
+        } else {
+          toast.error(result.message || 'Gagal membuat pesanan')
+        }
+        setIsProcessingBuy(false)
+        return
+      }
+
+      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
+      const newOrder = result.data
+      localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]))
+      
+      router.push(`/checkout/${newOrder.id}`)
+    } catch (err) {
+      console.error(err)
+      toast.error('Terjadi kesalahan saat memproses pesanan')
+      setIsProcessingBuy(false)
+    }
   }
 
   const handleAddToCart = () => {
@@ -613,7 +636,9 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <Button onClick={handleBuyNow} variant="primary" size="lg" style={{ width: '100%', fontSize: '1.2rem' }} className="btn-3d">Beli Langsung</Button>
+              <Button onClick={handleBuyNow} disabled={isProcessingBuy} variant="primary" size="lg" style={{ flex: 1, padding: '1.25rem', fontSize: '1.1rem' }} className="btn-3d">
+                {isProcessingBuy ? 'Memproses...' : '💳 Beli Sekarang'}
+              </Button>
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <Button onClick={handleAddToCart} variant="secondary" style={{ flex: 1 }}>+ Keranjang</Button>
                 <Button onClick={handleAddToWishlist} variant="secondary" style={{ padding: '1rem' }}>❤️</Button>

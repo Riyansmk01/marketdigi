@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabaseClient'
+import { vipReseller } from '@/lib/vipResellerClient'
 
 export async function POST(request: Request) {
   try {
@@ -62,6 +63,55 @@ export async function POST(request: Request) {
           .from('orders')
           .update({ status: 'Berhasil' })
           .eq('id', orderData.id)
+
+        // ==========================================
+        // TRIGGER VIP RESELLER INTEGRATION
+        // ==========================================
+        try {
+          const { data: itemsResult } = await supabase
+            .from('order_items')
+            .select('*, products(slug, category_id, fulfillment_type)')
+            .eq('order_id', orderData.id)
+          
+          const items = Array.isArray(itemsResult) ? itemsResult : []
+
+          for (const item of items) {
+            const product = item.products
+            if (!product) continue
+
+            // Jika fulfillment_type adalah 'Akun Digital' atau Top-Up
+            // Asumsi MVP: Slug product menyimpan service_code VIP Reseller, misal 'VIP-ML14'
+            const serviceCode = product.slug.toUpperCase()
+            const payload = item.custom_payload || {}
+            const customFields = payload.customFields || {}
+            
+            // Ambil data tujuan dari form cart (customFields)
+            const targetData = customFields.userId || customFields.email || customFields.phone || 'sample'
+            const targetZone = customFields.zoneId || ''
+
+            console.log(`[VIP RESELLER] Ordering ${serviceCode} for target: ${targetData}`)
+
+            // Pilih fungsi berdasarkan kategori
+            // Secara default kita tembak Game Feature untuk MVP ini
+            const vipRes = await vipReseller.orderGameFeature(serviceCode, targetData, targetZone)
+            
+            if (vipRes && vipRes.result) {
+              const trxid = vipRes.data.trxid
+              console.log(`[VIP RESELLER] Success! TRX ID: ${trxid}`)
+              
+              // Simpan trxid ke tabel orders agar bisa dicek oleh Webhook VIP
+              await supabase
+                .from('orders')
+                .update({ provider_trx_id: trxid })
+                .eq('id', orderData.id)
+            } else {
+              console.error(`[VIP RESELLER] Failed to order:`, vipRes)
+            }
+          }
+        } catch (vipErr) {
+          console.error('[VIP RESELLER] Integration Error:', vipErr)
+        }
+        // ==========================================
       }
     }
 

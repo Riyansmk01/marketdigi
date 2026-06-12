@@ -26,7 +26,7 @@ if (!isServer) {
 
 class QueryBuilder {
   table: string
-  filters: Array<{ type: 'eq', col: string, val: any }> = []
+  filters: Array<{ type: 'eq' | 'or', col: string, val: any }> = []
   singleRow: boolean = false
   isInsert: boolean = false
   isUpdate: boolean = false
@@ -66,6 +66,11 @@ class QueryBuilder {
 
   eq(col: string, val: any) {
     this.filters.push({ type: 'eq', col, val })
+    return this
+  }
+
+  or(condition: string) {
+    this.filters.push({ type: 'or', col: '', val: condition })
     return this
   }
 
@@ -127,8 +132,9 @@ class QueryBuilder {
 
         for (const filter of this.filters) {
           if (filter.type === 'eq') {
-            let colName = filter.col
-            query = query.eq(colName, filter.val)
+            query = query.eq(filter.col, filter.val)
+          } else if (filter.type === 'or') {
+            query = query.or(filter.val)
           }
         }
 
@@ -368,6 +374,18 @@ class QueryBuilder {
     for (const f of this.filters) {
       if (f.type === 'eq') {
         filtered = filtered.filter((item: any) => item[f.col] === f.val)
+      } else if (f.type === 'or') {
+        // Very basic mock implementation for 'col1.eq.val1,col2.eq.val2'
+        const conditions = typeof f.val === 'string' ? f.val.split(',') : []
+        filtered = filtered.filter((item: any) => {
+          return conditions.some(cond => {
+            const [col, op, val] = cond.split('.')
+            if (op === 'eq' && col && val !== undefined) {
+              return String(item[col]) === String(val)
+            }
+            return false
+          })
+        })
       }
     }
 

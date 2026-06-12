@@ -11,6 +11,7 @@ export default function CartPage() {
   const [cartItems, setCartItems] = useState<any[]>([])
   const [paymentMethod, setPaymentMethod] = useState('qris')
   const [itemToDelete, setItemToDelete] = useState<string | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
 
   // Load cart items on mount
   useEffect(() => {
@@ -46,29 +47,55 @@ export default function CartPage() {
   const serviceFee = subtotal > 0 ? 2500 : 0
   const total = subtotal + serviceFee
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cartItems.length === 0) return
     
-    // Save simulated order to localStorage so Riwayat Pesanan page can read it!
-    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
-    const newOrder = {
-      id: 'ord_' + Math.random().toString(36).substr(2, 9),
-      invoiceNo: 'INV-' + new Date().getFullYear() + (new Date().getMonth() + 1).toString().padStart(2, '0') + new Date().getDate().toString().padStart(2, '0') + '-' + Math.floor(1000 + Math.random() * 9000),
-      items: cartItems,
-      subtotal,
-      serviceFee,
-      total,
-      paymentMethod: paymentMethod.toUpperCase(),
-      status: 'Proses', // Proses, Berhasil, Tidak Berhasil, Garansi Aktif, Dikomplain
-      createdAt: new Date().toISOString()
+    setIsProcessing(true)
+    try {
+      const response = await fetch('/api/orders/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          items: cartItems,
+          subtotal,
+          serviceFee,
+          total,
+          paymentMethod: paymentMethod.toUpperCase()
+        })
+      })
+
+      const result = await response.json()
+      
+      if (!response.ok || !result.status) {
+        if (response.status === 401) {
+          toast.error('Silakan login terlebih dahulu untuk checkout.')
+          router.push('/login')
+        } else {
+          toast.error(result.message || 'Gagal membuat pesanan')
+        }
+        setIsProcessing(false)
+        return
+      }
+
+      // Save the returned order to localStorage so Riwayat Pesanan and Checkout pages can read it immediately
+      // (This maintains compatibility with the existing checkout UI without refactoring everything)
+      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
+      const newOrder = result.data
+      localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]))
+      
+      // Clear cart
+      setCartItems([])
+      localStorage.removeItem('cart')
+      
+      // Redirect to Checkout page
+      router.push(`/checkout/${newOrder.id}`)
+    } catch (err) {
+      console.error(err)
+      toast.error('Terjadi kesalahan saat memproses pesanan')
+      setIsProcessing(false)
     }
-    
-    localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]))
-    // Clear cart
-    setCartItems([])
-    localStorage.removeItem('cart')
-    // Redirect to Checkout page
-    router.push(`/checkout/${newOrder.id}`)
   }
 
   return (
@@ -190,8 +217,8 @@ export default function CartPage() {
               <span style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--accent-color)' }}>Rp {total.toLocaleString('id-ID')}</span>
             </div>
 
-            <Button onClick={handleCheckout} variant="primary" size="lg" style={{ width: '100%', fontSize: '1.15rem' }} className="btn-3d">
-              Bayar Sekarang
+            <Button onClick={handleCheckout} disabled={isProcessing} variant="primary" size="lg" style={{ width: '100%', fontSize: '1.15rem' }} className="btn-3d">
+              {isProcessing ? 'Memproses...' : 'Bayar Sekarang'}
             </Button>
             
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
