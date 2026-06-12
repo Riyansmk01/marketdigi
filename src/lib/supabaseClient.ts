@@ -206,20 +206,20 @@ class QueryBuilder {
     try {
       const { data: { user } } = await realClient.auth.getUser()
       if (user) {
-        // Fetch seller profile id
-        const { data: sellerData } = await realClient
+        // Fetch seller profile id (no .single() to avoid 406 when row missing)
+        const { data: spResult } = await realClient
           .from('seller_profiles')
           .select('id')
           .eq('user_id', user.id)
-          .single()
+        const sellerData = Array.isArray(spResult) ? spResult[0] : null
 
         if (sellerData) {
           // Fetch store id
-          const { data: storeData } = await realClient
+          const { data: storeResult } = await realClient
             .from('stores')
             .select('id')
             .eq('seller_id', sellerData.id)
-            .single()
+          const storeData = Array.isArray(storeResult) ? storeResult[0] : null
 
           if (storeData) {
             storeId = storeData.id
@@ -227,7 +227,7 @@ class QueryBuilder {
         }
       }
     } catch (e) {
-      console.error('Error finding store_id for product insert:', e)
+      // Non-critical
     }
 
     // Fallback if no store_id could be retrieved: fetch first store from DB
@@ -246,28 +246,28 @@ class QueryBuilder {
     let categoryId: string | null = null
     const categoryName = payload.categoryName || 'Software & OS'
     try {
-      const { data: catData } = await realClient
+      const { data: catResult } = await realClient
         .from('categories')
         .select('id')
         .eq('name', categoryName)
-        .single()
+      const catData = Array.isArray(catResult) ? catResult[0] : null
 
       if (catData) {
         categoryId = catData.id
       } else {
         // Create category if it doesn't exist
         const slug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-        const { data: newCat } = await realClient
+        const { data: newCatResult } = await realClient
           .from('categories')
           .insert({ name: categoryName, slug })
           .select('id')
-          .single()
+        const newCat = Array.isArray(newCatResult) ? newCatResult[0] : null
         if (newCat) {
           categoryId = newCat.id
         }
       }
     } catch (e) {
-      console.error('Error finding/creating category_id:', e)
+      // Non-critical
     }
 
     // Fallback if no category_id: fetch first category

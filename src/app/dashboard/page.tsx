@@ -74,12 +74,12 @@ export default function SellerDashboardPage() {
           return
         }
 
-        // Fetch user role
-        const { data: userData } = await supabase
+        // Fetch user role (no .single() to avoid 406)
+        const { data: usersResult } = await supabase
           .from('users')
           .select('role')
           .eq('id', user.id)
-          .single()
+        const userData = Array.isArray(usersResult) ? usersResult[0] : null
 
         if (userData && userData.role === 'buyer') {
           toast.error('Akses ditolak: Anda terdaftar sebagai Pembeli. Beralihlah menjadi Penjual untuk menggunakan Seller Center.')
@@ -88,21 +88,21 @@ export default function SellerDashboardPage() {
         }
 
         // Fetch seller details (tier)
-        const { data: sellerData } = await supabase
+        const { data: spResult } = await supabase
           .from('seller_profiles')
           .select('id, tier')
           .eq('user_id', user.id)
-          .single()
+        const sellerData = Array.isArray(spResult) ? spResult[0] : null
 
         if (sellerData) {
           setTier(sellerData.tier || 0)
 
-            // Fetch store details
-            const { data: storeData } = await supabase
+            // Fetch store details (no .single() to avoid 406)
+            const { data: storeResult } = await supabase
               .from('stores')
               .select('id, name, slug')
               .eq('seller_id', sellerData.id)
-              .single()
+            const storeData = Array.isArray(storeResult) ? storeResult[0] : null
 
             if (storeData) {
               setStoreName(storeData.name)

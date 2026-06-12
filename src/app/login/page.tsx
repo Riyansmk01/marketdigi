@@ -23,15 +23,24 @@ export default function LoginPage() {
   const [isConnecting, setIsConnecting] = useState(false)
 
   useEffect(() => {
-    // Check if there is an active session (e.g. from Google redirect or existing token)
+    // Only process session on OAuth redirect (when URL hash is present) or fresh page load after OAuth
     async function checkAuthSession() {
       if (typeof window !== 'undefined') {
+        // Only run on OAuth callback (hash present) or if localStorage shows logged in
+        const hasHash = window.location.hash.includes('access_token')
+        const alreadyLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
+        
+        // If already logged in and no OAuth hash, skip (avoid re-processing)
+        if (alreadyLoggedIn && !hasHash) {
+          return
+        }
+
         setIsConnecting(true)
         try {
           const { data: { session }, error } = await supabase.auth.getSession()
           
           // Clear Supabase session tokens from URL hash immediately
-          if (typeof window !== 'undefined' && window.location.hash) {
+          if (window.location.hash) {
             window.history.replaceState(null, '', window.location.pathname)
           }
 
@@ -39,60 +48,62 @@ export default function LoginPage() {
             localStorage.setItem('userEmail', session.user.email || '')
             localStorage.setItem('isLoggedIn', 'true')
             
-            // Fetch database-backed profile role and balance
-            let role = 'seller'
-            const { data: dbUser } = await supabase.from('users').select('role, balance').eq('id', session.user.id).single()
+            // Fetch database-backed profile role and balance (no .single() to avoid 406)
+            const { data: usersResult } = await supabase.from('users').select('role, balance').eq('id', session.user.id)
+            const dbUser = Array.isArray(usersResult) ? usersResult[0] : null
             
-            // Check for dynamic OAuth role selection
-            const oauthChosenRole = localStorage.getItem('oauth_chosen_role')
-            if (oauthChosenRole) {
-              role = oauthChosenRole
-              await supabase.from('users').update({ role: oauthChosenRole }).eq('id', session.user.id)
-              localStorage.removeItem('oauth_chosen_role')
-            } else if (dbUser) {
-              role = dbUser.role || 'seller'
-            }
+            // Determine effective role
+            let role = dbUser?.role || 'buyer'
 
-            // Sync email checks for admin role
+            // Admin override by email
             if (session.user.email === 'perdhanariyan@gmail.com') {
               role = 'admin'
               await supabase.from('users').update({ role: 'admin' }).eq('id', session.user.id)
+            } else {
+              // Check for dynamic OAuth role selection (from register page)
+              const oauthChosenRole = localStorage.getItem('oauth_chosen_role')
+              if (oauthChosenRole) {
+                role = oauthChosenRole
+                // Always update DB to chosen role — even if user already existed
+                await supabase.from('users').update({ role: oauthChosenRole }).eq('id', session.user.id)
+                localStorage.removeItem('oauth_chosen_role')
+              }
             }
 
-            if (dbUser) {
-              localStorage.setItem('walletBalance', String(dbUser.balance || 0))
-            } else {
-              localStorage.setItem('walletBalance', '0')
-            }
+            localStorage.setItem('walletBalance', String(dbUser?.balance || 0))
             localStorage.setItem('userRole', role)
             
-            // Sync/Create store properties from stores table (ensures Google registration doesn't skip store onboarding)
+            // Sync/Create store properties (only for seller/admin)
             if (role === 'seller' || role === 'admin') {
-              let { data: sellerProfile } = await supabase.from('seller_profiles').select('id').eq('user_id', session.user.id).single()
+              const { data: spResult } = await supabase.from('seller_profiles').select('id').eq('user_id', session.user.id)
+              let sellerProfile = Array.isArray(spResult) ? spResult[0] : null
+
               if (!sellerProfile) {
-                // Auto-create missing seller profile with random whatsapp number for self-validation
+                // Auto-create missing seller profile
                 const randomPhone = '0853' + Math.floor(10000000 + Math.random() * 90000000)
-                const { data: newProfile } = await supabase.from('seller_profiles').insert({
+                const { data: newProfileResult } = await supabase.from('seller_profiles').insert({
                   user_id: session.user.id,
                   whatsapp_number: randomPhone,
                   whatsapp_verified: true,
                   tier: 0
-                }).select('id').single()
-                sellerProfile = newProfile
+                }).select('id')
+                sellerProfile = Array.isArray(newProfileResult) ? newProfileResult[0] : null
               }
 
               if (sellerProfile) {
-                let { data: store } = await supabase.from('stores').select('name, slug').eq('seller_id', sellerProfile.id).single()
+                const { data: storeResult } = await supabase.from('stores').select('name, slug').eq('seller_id', sellerProfile.id)
+                let store = Array.isArray(storeResult) ? storeResult[0] : null
+
                 if (!store) {
                   const emailPrefix = session.user.email?.split('@')[0] || 'store'
                   const storeNameDefault = 'Toko ' + emailPrefix
                   const storeSlugDefault = emailPrefix.toLowerCase().replace(/[^a-z0-9-]/g, '') + '-' + Math.floor(100 + Math.random() * 900)
-                  const { data: newStore } = await supabase.from('stores').insert({
+                  const { data: newStoreResult } = await supabase.from('stores').insert({
                     seller_id: sellerProfile.id,
                     name: storeNameDefault,
                     slug: storeSlugDefault
-                  }).select('name, slug').single()
-                  store = newStore
+                  }).select('name, slug')
+                  store = Array.isArray(newStoreResult) ? newStoreResult[0] : null
                 }
 
                 if (store) {
@@ -103,7 +114,7 @@ export default function LoginPage() {
             }
             
             window.dispatchEvent(new Event('storage'))
-            toast.success(`Berhasil masuk! Selamat datang kembali, ${session.user.email}.`)
+            toast.success(`Berhasil masuk! Selamat datang, ${session.user.email}.`)
             router.push('/profile?loginSuccess=true')
           } else if (error) {
             console.error('Session check error:', error)
@@ -154,34 +165,31 @@ export default function LoginPage() {
           localStorage.setItem('userEmail', data.session.user.email || '')
           localStorage.setItem('isLoggedIn', 'true')
           
-          // Fetch database-backed profile role and balance
-          let role = 'seller'
-          const { data: dbUser } = await supabase.from('users').select('role, balance').eq('id', data.session.user.id).single()
-          
-          if (dbUser) {
-            role = dbUser.role || 'seller'
-          }
+          // Fetch role from DB (no .single() to avoid 406)
+          const { data: usersResult } = await supabase.from('users').select('role, balance').eq('id', data.session.user.id)
+          const dbUser = Array.isArray(usersResult) ? usersResult[0] : null
+          let role = dbUser?.role || 'buyer'
 
-          // Sync email checks for admin role
+          // Admin override by email
           if (data.session.user.email === 'perdhanariyan@gmail.com') {
             role = 'admin'
             await supabase.from('users').update({ role: 'admin' }).eq('id', data.session.user.id)
           }
 
-          if (dbUser) {
-            localStorage.setItem('walletBalance', String(dbUser.balance || 0))
-          } else {
-            localStorage.setItem('walletBalance', '0')
-          }
+          localStorage.setItem('walletBalance', String(dbUser?.balance || 0))
           localStorage.setItem('userRole', role)
           
-          // Sync store properties from stores table
-          const { data: sellerProfile } = await supabase.from('seller_profiles').select('id').eq('user_id', data.session.user.id).single()
-          if (sellerProfile) {
-            const { data: store } = await supabase.from('stores').select('name, slug').eq('seller_id', sellerProfile.id).single()
-            if (store) {
-              localStorage.setItem('storeName', store.name)
-              localStorage.setItem('storeSlug', store.slug)
+          // Sync store properties (only for seller/admin)
+          if (role === 'seller' || role === 'admin') {
+            const { data: spResult } = await supabase.from('seller_profiles').select('id').eq('user_id', data.session.user.id)
+            const sellerProfile = Array.isArray(spResult) ? spResult[0] : null
+            if (sellerProfile) {
+              const { data: storeResult } = await supabase.from('stores').select('name, slug').eq('seller_id', sellerProfile.id)
+              const store = Array.isArray(storeResult) ? storeResult[0] : null
+              if (store) {
+                localStorage.setItem('storeName', store.name)
+                localStorage.setItem('storeSlug', store.slug)
+              }
             }
           }
           
