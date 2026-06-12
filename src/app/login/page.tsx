@@ -23,15 +23,17 @@ export default function LoginPage() {
   const [isConnecting, setIsConnecting] = useState(false)
 
   useEffect(() => {
-    // Only process session on OAuth redirect (when URL hash is present) or fresh page load after OAuth
+    // Only process session on OAuth redirect (when URL hash or PKCE code param is present)
     async function checkAuthSession() {
       if (typeof window !== 'undefined') {
-        // Only run on OAuth callback (hash present) or if localStorage shows logged in
-        const hasHash = window.location.hash.includes('access_token')
+        // Detect both implicit (hash) and PKCE (code param) OAuth callbacks
+        const hasHashToken = window.location.hash.includes('access_token')
+        const hasPkceCode = window.location.search.includes('code=')
+        const isOAuthCallback = hasHashToken || hasPkceCode
         const alreadyLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
         
-        // If already logged in and no OAuth hash, skip (avoid re-processing)
-        if (alreadyLoggedIn && !hasHash) {
+        // Skip if already logged in and this is NOT an OAuth callback
+        if (alreadyLoggedIn && !isOAuthCallback) {
           return
         }
 
@@ -39,8 +41,8 @@ export default function LoginPage() {
         try {
           const { data: { session }, error } = await supabase.auth.getSession()
           
-          // Clear Supabase session tokens from URL hash immediately
-          if (window.location.hash) {
+          // Clear session tokens from URL (both hash and query params)
+          if (window.location.hash || window.location.search.includes('code=')) {
             window.history.replaceState(null, '', window.location.pathname)
           }
 
@@ -55,16 +57,18 @@ export default function LoginPage() {
             // Determine effective role
             let role = dbUser?.role || 'buyer'
 
-            // Admin override by email
+            // Admin override by email (highest priority)
             if (session.user.email === 'perdhanariyan@gmail.com') {
               role = 'admin'
               await supabase.from('users').update({ role: 'admin' }).eq('id', session.user.id)
             } else {
               // Check for dynamic OAuth role selection (from register page)
               const oauthChosenRole = localStorage.getItem('oauth_chosen_role')
-              if (oauthChosenRole) {
+              // Validate role whitelist to prevent injection
+              const validRoles = ['buyer', 'seller']
+              if (oauthChosenRole && validRoles.includes(oauthChosenRole)) {
                 role = oauthChosenRole
-                // Always update DB to chosen role — even if user already existed
+                // ALWAYS update DB to chosen role — even if user already existed
                 await supabase.from('users').update({ role: oauthChosenRole }).eq('id', session.user.id)
                 localStorage.removeItem('oauth_chosen_role')
               }

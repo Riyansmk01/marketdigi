@@ -53,38 +53,42 @@ export default function ProfilePage() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          // Fetch role and balance
-          const { data: userData } = await supabase.from('users').select('role, balance').eq('id', user.id).single()
+          // Fetch role and balance (no .single() to avoid 406)
+          const { data: usersResult } = await supabase.from('users').select('role, balance').eq('id', user.id)
+          const userData = Array.isArray(usersResult) ? usersResult[0] : null
           if (userData) {
-            setRole(userData.role || 'seller')
-            localStorage.setItem('userRole', userData.role || 'seller')
+            setRole(userData.role || 'buyer')
+            localStorage.setItem('userRole', userData.role || 'buyer')
             setWalletBalance(Number(userData.balance || 0))
             localStorage.setItem('walletBalance', String(userData.balance || 0))
           }
 
-          // Fetch seller profile details (tier & bank)
-          const { data: sellerData } = await supabase
-            .from('seller_profiles')
-            .select('id, tier, bank_verified')
-            .eq('user_id', user.id)
-            .single()
+          // Fetch seller profile details (tier & bank) - only if seller/admin
+          const currentRole = userData?.role || localStorage.getItem('userRole') || 'buyer'
+          if (currentRole === 'seller' || currentRole === 'admin') {
+            const { data: spResult } = await supabase
+              .from('seller_profiles')
+              .select('id, tier, bank_verified')
+              .eq('user_id', user.id)
+            const sellerData = Array.isArray(spResult) ? spResult[0] : null
 
-          if (sellerData) {
-            setTier(sellerData.tier || 0)
-            setBankVerified(sellerData.bank_verified || false)
+            if (sellerData) {
+              setTier(sellerData.tier || 0)
+              setBankVerified(sellerData.bank_verified || false)
 
-            // Fetch store properties
-            const { data: storeData } = await supabase
-              .from('stores')
-              .select('name, slug')
-              .eq('seller_id', sellerData.id)
-              .single()
+              // Fetch store properties
+              const { data: storeResult } = await supabase
+                .from('stores')
+                .select('name, slug')
+                .eq('seller_id', sellerData.id)
+              const storeData = Array.isArray(storeResult) ? storeResult[0] : null
 
-            if (storeData) {
-              setStoreName(storeData.name)
-              setStoreSlug(storeData.slug)
-              localStorage.setItem('storeName', storeData.name)
-              localStorage.setItem('storeSlug', storeData.slug)
+              if (storeData) {
+                setStoreName(storeData.name)
+                setStoreSlug(storeData.slug)
+                localStorage.setItem('storeName', storeData.name)
+                localStorage.setItem('storeSlug', storeData.slug)
+              }
             }
           }
         }

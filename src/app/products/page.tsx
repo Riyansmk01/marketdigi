@@ -45,7 +45,8 @@ function ProductsCatalog() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        const { data, error } = await supabase.from('products').select('*')
+        // Only fetch published products
+        const { data, error } = await supabase.from('products').select('*').eq('is_published', true)
         if (data) {
           // Fetch active reviews to calculate rating details dynamically
           const { data: reviewsData } = await supabase
@@ -68,6 +69,9 @@ function ProductsCatalog() {
             const stats = reviewsMap[p.id] || { sum: 0, count: 0 }
             return {
               ...p,
+              // Normalize name field: DB uses 'name', mock uses 'title'
+              title: p.name || p.title || 'Produk Digital',
+              categoryName: p.categoryName || p.categories?.name || '',
               ratingAvg: stats.count > 0 ? stats.sum / stats.count : 0,
               reviewCount: stats.count
             }
@@ -98,28 +102,34 @@ function ProductsCatalog() {
 
   // Filter products based on active category, search key, and prices
   const filteredProducts = products.filter(p => {
-    const categoryMatch = !categoryParam || p.categoryName?.toLowerCase() === categoryParam.toLowerCase()
-    const searchMatch = !searchParam || p.title?.toLowerCase().includes(searchParam.toLowerCase())
-    const price = p.price || 0
+    // Use title (normalized above) for search, also check categoryName
+    const productTitle = p.title || ''
+    const productCategory = p.categoryName || ''
+    const categoryMatch = !categoryParam || productCategory.toLowerCase() === categoryParam.toLowerCase()
+    const searchMatch = !searchParam || productTitle.toLowerCase().includes(searchParam.toLowerCase())
+    const price = Number(p.price) || 0
     const minMatch = !priceFilter.min || price >= priceFilter.min
-    const maxMatch = !priceFilter.max || price <= priceFilter.max
+    const maxMatch = priceFilter.max === Infinity || !priceFilter.max || price <= priceFilter.max
     return categoryMatch && searchMatch && minMatch && maxMatch
   })
 
   // Apply sorting
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sortBy === 'Harga Terendah') {
-      return a.price - b.price
+      return Number(a.price) - Number(b.price)
     }
     if (sortBy === 'Harga Tertinggi') {
-      return b.price - a.price
+      return Number(b.price) - Number(a.price)
     }
     if (sortBy === 'Terbaru') {
-      return b.id.localeCompare(a.id)
+      // Use created_at timestamp if available, fallback to id comparison
+      const dateA = (a as any).created_at ? new Date((a as any).created_at).getTime() : 0
+      const dateB = (b as any).created_at ? new Date((b as any).created_at).getTime() : 0
+      return dateB - dateA
     }
-    // Terpopuler (by reviews count / rating)
-    const rA = a.seller?.reviewCount || 0
-    const rB = b.seller?.reviewCount || 0
+    // Terpopuler (by reviewCount directly computed from DB reviews)
+    const rA = (a as any).reviewCount || 0
+    const rB = (b as any).reviewCount || 0
     return rB - rA
   })
 

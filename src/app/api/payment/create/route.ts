@@ -41,11 +41,11 @@ export async function POST(request: Request) {
 
     // Double Security: Save transaction details (signature & expired_at) to database
     try {
-      const { data: orderData } = await supabase
+      const { data: orderResult } = await supabase
         .from('orders')
         .select('id')
         .eq('invoice_no', order_id)
-        .single()
+      const orderData = Array.isArray(orderResult) ? orderResult[0] : null
 
       if (orderData && data.data && data.data.signature) {
         // Insert signature for double-security validation on webhook

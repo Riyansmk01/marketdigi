@@ -13,11 +13,11 @@ export async function POST(request: Request) {
 
       if (paymentStatus === 'PAID') {
         // 1. Find the order in our database using invoice number
-        const { data: orderData, error: orderErr } = await supabase
+        const { data: orderResult, error: orderErr } = await supabase
           .from('orders')
           .select('id, status')
           .eq('invoice_no', order_id)
-          .single()
+        const orderData = Array.isArray(orderResult) ? orderResult[0] : null
 
         if (orderErr || !orderData) {
           console.error(`Webhook Error: Order invoice ${order_id} not found in database.`)
@@ -25,11 +25,11 @@ export async function POST(request: Request) {
         }
 
         // 2. Find the payment transaction for double security validation
-        const { data: tx, error: txErr } = await supabase
+        const { data: txResult, error: txErr } = await supabase
           .from('payment_transactions')
           .select('*')
           .eq('order_id', orderData.id)
-          .single()
+        const tx = Array.isArray(txResult) ? txResult[0] : null
 
         if (txErr || !tx) {
           console.error(`Webhook Error: Payment transaction for order ${order_id} not found.`)

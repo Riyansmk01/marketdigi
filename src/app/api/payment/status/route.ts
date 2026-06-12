@@ -12,18 +12,18 @@ export async function GET(request: Request) {
 
     // 1. Check local database first for PAID status
     try {
-      const { data: orderData } = await supabase
+      const { data: orderResult } = await supabase
         .from('orders')
         .select('id, status')
         .eq('invoice_no', order_id)
-        .single()
+      const orderData = Array.isArray(orderResult) ? orderResult[0] : null
 
       if (orderData) {
-        const { data: tx } = await supabase
+        const { data: txResult } = await supabase
           .from('payment_transactions')
           .select('*')
           .eq('order_id', orderData.id)
-          .single()
+        const tx = Array.isArray(txResult) ? txResult[0] : null
 
         if (tx && tx.status === 'paid') {
           console.log(`Status API: Order ${order_id} found PAID in database. Returning success.`)
@@ -67,30 +67,30 @@ export async function GET(request: Request) {
     const gatewayStatus = data.data?.status
     if (gatewayStatus === 'SUCCESS' || gatewayStatus === 'PAID') {
       try {
-        const { data: orderData } = await supabase
+        const { data: orderResult2 } = await supabase
           .from('orders')
           .select('id, status')
           .eq('invoice_no', order_id)
-          .single()
+        const orderData2 = Array.isArray(orderResult2) ? orderResult2[0] : null
 
-        if (orderData) {
-          const { data: tx } = await supabase
+        if (orderData2) {
+          const { data: txResult2 } = await supabase
             .from('payment_transactions')
             .select('*')
-            .eq('order_id', orderData.id)
-            .single()
+            .eq('order_id', orderData2.id)
+          const tx2 = Array.isArray(txResult2) ? txResult2[0] : null
 
-          if (tx && tx.status !== 'paid') {
+          if (tx2 && tx2.status !== 'paid') {
             const amountPaid = Number(data.data.total_amount)
             await supabase
               .from('payment_transactions')
               .update({ status: 'paid', amount_paid: amountPaid })
-              .eq('id', tx.id)
+              .eq('id', tx2.id)
 
             await supabase
               .from('orders')
               .update({ status: 'Berhasil' })
-              .eq('id', orderData.id)
+              .eq('id', orderData2.id)
             console.log(`Self-Healing: Synchronized PAID status for order ${order_id} via Status Check fallback.`)
           }
         }

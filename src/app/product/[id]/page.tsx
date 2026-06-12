@@ -127,14 +127,16 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
 
   async function loadProductAndReviews() {
     try {
-      const { data, error } = await supabase
+      const { data: productResult, error } = await supabase
         .from('products')
         .select('*')
         .eq('id', id)
-        .single()
+      const data = Array.isArray(productResult) ? productResult[0] : null
       if (data) {
         setProduct(data)
-        setSelectedVariant(data.title.toLowerCase().includes('windows') ? 'Pro' : 'Standard')
+        // Use product.name (DB field) with fallback to title for mock data
+        const productName = data.name || data.title || ''
+        setSelectedVariant(productName.toLowerCase().includes('windows') ? 'Pro' : 'Standard')
         
         // Fetch seller details (tier/stats)
         if (data.store_id) {
@@ -178,9 +180,10 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
       }
 
       // Check purchase and role
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        const { data: dbUser } = await supabase.from('users').select('role').eq('id', session.user.id).single()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: usersResult } = await supabase.from('users').select('role').eq('id', user.id)
+        const dbUser = Array.isArray(usersResult) ? usersResult[0] : null
         if (dbUser) {
           setUserRole(dbUser.role)
         }
@@ -189,7 +192,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         const { data: userOrders } = await supabase
           .from('orders')
           .select('*, order_items(*)')
-          .eq('buyer_id', session.user.id)
+          .eq('buyer_id', user.id)
           .eq('status', 'Berhasil')
 
         if (userOrders) {
@@ -226,24 +229,23 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     e.preventDefault()
     setIsSubmittingReview(true)
     try {
-      const { data: { session } } = await supabase.auth.getUser()
-      if (!session?.user) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
         toast.error('Anda harus login terlebih dahulu!')
         return
       }
 
-      const { data, error } = await supabase
+      const { data: reviewResult, error } = await supabase
         .from('product_reviews')
         .insert({
           product_id: id,
-          user_id: session.user.id,
+          user_id: user.id,
           rating: ratingVal,
           comment: commentText,
           media_url: mediaBase64 || null,
           is_flagged: false
         })
         .select('*, users(email)')
-        .single()
 
       if (error) throw error
 
@@ -294,11 +296,12 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     )
   }
 
-  const theme = getProductTheme(product.title)
-  const info = getProductDescription(product.title)
+  const theme = getProductTheme(product.name || product.title || '')
+  const info = getProductDescription(product.name || product.title || '')
 
-  const isWindows = product.title.toLowerCase().includes('windows')
-  const productPrice = isWindows && selectedVariant === 'Home' ? product.price - 30000 : product.price
+  const productNameDisplay = product.name || product.title || 'Produk Digital'
+  const isWindows = productNameDisplay.toLowerCase().includes('windows')
+  const productPrice = isWindows && selectedVariant === 'Home' ? product.price - 30000 : Number(product.price || 0)
   const totalPrice = productPrice * qty
 
   const handleBuyNow = () => {
@@ -309,7 +312,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
       items: [
         {
           id: product.id,
-          title: product.title + (selectedVariant ? ` (${selectedVariant})` : ''),
+          title: productNameDisplay + (selectedVariant ? ` (${selectedVariant})` : ''),
           price: productPrice,
           qty: qty,
           variant: selectedVariant,
@@ -334,7 +337,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     const cartItem = {
       id: 'p_cart_' + product.id + '_' + selectedVariant,
       productId: product.id,
-      title: product.title + (selectedVariant ? ` (${selectedVariant})` : ''),
+      title: productNameDisplay + (selectedVariant ? ` (${selectedVariant})` : ''),
       price: productPrice,
       qty: qty,
       variant: selectedVariant,
@@ -351,7 +354,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     }
     localStorage.setItem('cart', JSON.stringify(existingCart))
 
-    toast.success(`🎉 ${product.title} (${qty}x) berhasil ditambahkan ke keranjang belanja!`, {
+    toast.success(`🎉 ${productNameDisplay} (${qty}x) berhasil ditambahkan ke keranjang belanja!`, {
       action: {
         label: 'Lihat Keranjang',
         onClick: () => router.push('/cart')
@@ -363,11 +366,11 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     const existingWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]')
     const wishItem = {
       id: 'p_wish_' + product.id,
-      title: product.title,
+      title: productNameDisplay,
       price: product.price,
-      displayPrice: product.displayPrice || `Rp ${product.price.toLocaleString('id-ID')}`,
+      displayPrice: product.displayPrice || `Rp ${Number(product.price).toLocaleString('id-ID')}`,
       badge: product.badge || 'Ready',
-      fulfillmentType: product.fulfillmentType,
+      fulfillmentType: product.fulfillmentType || product.fulfillment_type,
       slug: product.slug,
       icon: theme.iconText === 'Windows' ? '💻' : theme.iconText === 'Netflix' ? '📺' : theme.iconText === 'Spotify' ? '🎵' : theme.iconText === 'Canva' ? '🎨' : '📦'
     }
@@ -375,7 +378,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     if (!existingWishlist.some((item: any) => item.title === wishItem.title)) {
       localStorage.setItem('wishlist', JSON.stringify([wishItem, ...existingWishlist]))
     }
-    toast.success(`❤️ ${product.title} ditambahkan ke Wishlist Anda!`)
+    toast.success(`❤️ ${productNameDisplay} ditambahkan ke Wishlist Anda!`)
   }
 
   return (
@@ -521,8 +524,10 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         {/* Kolom Kanan: Checkout Box */}
         <div style={{ position: 'sticky', top: '100px' }}>
           <div style={{ marginBottom: '2rem' }}>
-            <Badge variant="success" className="card-3d" style={{ marginBottom: '1rem' }}>Stok Tersedia</Badge>
-            <h1 style={{ fontSize: '2.2rem', fontWeight: 900, lineHeight: 1.2 }}>{product.title}</h1>
+            <Badge variant="success" className="card-3d" style={{ marginBottom: '1rem' }}>
+              {product.stock_qty !== undefined ? (product.stock_qty > 0 ? 'Stok Tersedia' : 'Stok Habis') : 'Stok Tersedia'}
+            </Badge>
+            <h1 style={{ fontSize: '2.2rem', fontWeight: 900, lineHeight: 1.2 }}>{productNameDisplay}</h1>
             <div style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--accent-color)', margin: '1rem 0', textShadow: '0 2px 4px rgba(99, 102, 241, 0.3)' }}>
               Rp {productPrice.toLocaleString('id-ID')}
             </div>
@@ -589,7 +594,9 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 <span style={{ width: '50px', textAlign: 'center', alignSelf: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>{qty}</span>
                 <button onClick={() => setQty(prev => prev + 1)} className="btn-ghost" style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', fontWeight: 'bold', border: 'none', background: 'transparent', cursor: 'pointer' }}>+</button>
               </div>
-              <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Sisa stok: 99+</span>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                Sisa stok: {product.stock_qty !== undefined ? product.stock_qty : '99+'}
+              </span>
             </div>
             
             <Input 

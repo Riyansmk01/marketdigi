@@ -55,11 +55,11 @@ export default function SettingsPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          const { data: sellerProfile } = await supabase
+          const { data: spResult } = await supabase
             .from('seller_profiles')
             .select('bank_name, bank_account_no, bank_account_name, bank_verified, tier')
             .eq('user_id', user.id)
-            .single()
+          const sellerProfile = Array.isArray(spResult) ? spResult[0] : null
 
           if (sellerProfile) {
             setBankName(sellerProfile.bank_name || '')
@@ -70,7 +70,7 @@ export default function SettingsPage() {
           }
         }
       } catch (err) {
-        console.error('Error loading bank details:', err)
+        // Non-critical, ignore silently
       }
     }
     fetchBankDetails()

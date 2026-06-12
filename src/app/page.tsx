@@ -14,7 +14,8 @@ export default function Home() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        const { data, error } = await supabase.from('products').select('*')
+        // Only fetch published products
+        const { data, error } = await supabase.from('products').select('*').eq('is_published', true)
         if (data) {
           // Fetch active reviews to calculate rating details dynamically
           const { data: reviewsData } = await supabase
@@ -37,6 +38,10 @@ export default function Home() {
             const stats = reviewsMap[p.id] || { sum: 0, count: 0 }
             return {
               ...p,
+              // Normalize: DB uses 'name', mock uses 'title'
+              title: p.name || p.title || 'Produk Digital',
+              price: Number(p.price || 0),
+              displayPrice: `Rp ${Number(p.price || 0).toLocaleString('id-ID')}`,
               ratingAvg: stats.count > 0 ? stats.sum / stats.count : 0,
               reviewCount: stats.count
             }
