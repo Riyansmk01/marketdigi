@@ -93,31 +93,38 @@ export function Navbar() {
         localStorage.setItem('isLoggedIn', 'true');
         
         // Fetch database-backed profile role
-        let userRole = 'seller';
+        let userRole = 'buyer';
         try {
-          const { data: dbUser } = await supabase.from('users').select('role, balance').eq('id', session.user.id).single();
+          const { data: usersResult } = await supabase.from('users').select('role, balance').eq('id', session.user.id);
+          const dbUser = Array.isArray(usersResult) ? usersResult[0] : usersResult;
           if (dbUser) {
-            userRole = dbUser.role || 'seller';
+            userRole = dbUser.role || 'buyer';
             localStorage.setItem('walletBalance', String(dbUser.balance || 0));
           }
         } catch (err) {
-          console.error('Navbar error fetching role:', err);
+          // Non-critical; silently ignore
         }
         localStorage.setItem('userRole', userRole);
 
-        // Fetch store properties from stores table
-        try {
-          const { data: sellerProfile } = await supabase.from('seller_profiles').select('id, whatsapp_number').eq('user_id', session.user.id).single();
-          if (sellerProfile) {
-            localStorage.setItem('storePhone', sellerProfile.whatsapp_number);
-            const { data: store } = await supabase.from('stores').select('name, slug').eq('seller_id', sellerProfile.id).single();
-            if (store) {
-              localStorage.setItem('storeName', store.name);
-              localStorage.setItem('storeSlug', store.slug);
+        // Only fetch seller store data if user is seller or admin
+        if (userRole === 'seller' || userRole === 'admin') {
+          try {
+            const { data: spResult } = await supabase.from('seller_profiles').select('id, whatsapp_number').eq('user_id', session.user.id);
+            const sellerProfile = Array.isArray(spResult) ? spResult[0] : null;
+            if (sellerProfile) {
+              if (sellerProfile.whatsapp_number) {
+                localStorage.setItem('storePhone', sellerProfile.whatsapp_number);
+              }
+              const { data: storeResult } = await supabase.from('stores').select('name, slug').eq('seller_id', sellerProfile.id);
+              const store = Array.isArray(storeResult) ? storeResult[0] : null;
+              if (store) {
+                localStorage.setItem('storeName', store.name);
+                localStorage.setItem('storeSlug', store.slug);
+              }
             }
+          } catch (err) {
+            // Non-critical; silently ignore
           }
-        } catch (err) {
-          console.error('Navbar error fetching store:', err);
         }
         checkAuth();
         checkNotifications();

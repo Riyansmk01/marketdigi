@@ -7,6 +7,9 @@ export const isSupabaseConfigured = () => {
   return supabaseUrl !== '' && supabaseAnonKey !== ''
 }
 
+// Single instance client to prevent "Multiple GoTrueClient instances" warnings
+export const realClient = isSupabaseConfigured() ? createClient(supabaseUrl, supabaseAnonKey) : null
+
 // Initialize dynamic database on client side
 const isServer = typeof window === 'undefined'
 if (!isServer) {
@@ -31,6 +34,9 @@ class QueryBuilder {
   payload: any = null
 
   selectColumns: string = '*'
+  orderColumn: string | null = null
+  orderOptions: { ascending?: boolean } | null = null
+  limitCount: number | null = null
 
   constructor(table: string) {
     this.table = table
@@ -68,6 +74,17 @@ class QueryBuilder {
     return this
   }
 
+  order(column: string, options?: { ascending?: boolean }) {
+    this.orderColumn = column
+    this.orderOptions = options || null
+    return this
+  }
+
+  limit(count: number) {
+    this.limitCount = count
+    return this
+  }
+
   // Handle standard promise resolve/reject for await
   async then(onfulfilled?: (value: any) => any, onrejected?: (reason: any) => any) {
     try {
@@ -81,9 +98,8 @@ class QueryBuilder {
   }
 
   async execute() {
-    if (isSupabaseConfigured()) {
+    if (realClient) {
       try {
-        const realClient = createClient(supabaseUrl, supabaseAnonKey)
         let query: any = realClient.from(this.table)
         
         if (this.isInsert) {
@@ -114,6 +130,14 @@ class QueryBuilder {
             let colName = filter.col
             query = query.eq(colName, filter.val)
           }
+        }
+
+        if (this.orderColumn) {
+          query = query.order(this.orderColumn, this.orderOptions || undefined)
+        }
+
+        if (this.limitCount !== null) {
+          query = query.limit(this.limitCount)
         }
 
         if (this.singleRow) {
@@ -347,6 +371,25 @@ class QueryBuilder {
       }
     }
 
+    if (this.orderColumn) {
+      const col = this.orderColumn
+      const asc = this.orderOptions?.ascending !== false
+      filtered.sort((a: any, b: any) => {
+        let valA = a[col]
+        let valB = b[col]
+        if (valA === undefined || valA === null) return 1
+        if (valB === undefined || valB === null) return -1
+        if (typeof valA === 'string') {
+          return asc ? valA.localeCompare(valB) : valB.localeCompare(valA)
+        }
+        return asc ? (valA - valB) : (valB - valA)
+      })
+    }
+
+    if (this.limitCount !== null) {
+      filtered = filtered.slice(0, this.limitCount)
+    }
+
     if (this.singleRow) {
       return { data: filtered[0] || null, error: filtered[0] ? null : { message: 'Not found' } }
     }
@@ -354,9 +397,6 @@ class QueryBuilder {
     return { data: filtered, error: null }
   }
 }
-
-// Create a client wrapper proxy so that standard auth functions and client extensions pass through perfectly
-const realClient = isSupabaseConfigured() ? createClient(supabaseUrl, supabaseAnonKey) : null
 
 export const supabase: any = new Proxy({} as any, {
   get(target, prop) {
