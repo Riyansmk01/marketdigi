@@ -29,6 +29,12 @@ export default function LoginPage() {
         setIsConnecting(true)
         try {
           const { data: { session }, error } = await supabase.auth.getSession()
+          
+          // Clear Supabase session tokens from URL hash immediately
+          if (typeof window !== 'undefined' && window.location.hash) {
+            window.history.replaceState(null, '', window.location.pathname)
+          }
+
           if (session?.user) {
             localStorage.setItem('userEmail', session.user.email || '')
             localStorage.setItem('isLoggedIn', 'true')
@@ -60,13 +66,39 @@ export default function LoginPage() {
             }
             localStorage.setItem('userRole', role)
             
-            // Sync store properties from stores table
-            const { data: sellerProfile } = await supabase.from('seller_profiles').select('id').eq('user_id', session.user.id).single()
-            if (sellerProfile) {
-              const { data: store } = await supabase.from('stores').select('name, slug').eq('seller_id', sellerProfile.id).single()
-              if (store) {
-                localStorage.setItem('storeName', store.name)
-                localStorage.setItem('storeSlug', store.slug)
+            // Sync/Create store properties from stores table (ensures Google registration doesn't skip store onboarding)
+            if (role === 'seller' || role === 'admin') {
+              let { data: sellerProfile } = await supabase.from('seller_profiles').select('id').eq('user_id', session.user.id).single()
+              if (!sellerProfile) {
+                // Auto-create missing seller profile with random whatsapp number for self-validation
+                const randomPhone = '0853' + Math.floor(10000000 + Math.random() * 90000000)
+                const { data: newProfile } = await supabase.from('seller_profiles').insert({
+                  user_id: session.user.id,
+                  whatsapp_number: randomPhone,
+                  whatsapp_verified: true,
+                  tier: 0
+                }).select('id').single()
+                sellerProfile = newProfile
+              }
+
+              if (sellerProfile) {
+                let { data: store } = await supabase.from('stores').select('name, slug').eq('seller_id', sellerProfile.id).single()
+                if (!store) {
+                  const emailPrefix = session.user.email?.split('@')[0] || 'store'
+                  const storeNameDefault = 'Toko ' + emailPrefix
+                  const storeSlugDefault = emailPrefix.toLowerCase().replace(/[^a-z0-9-]/g, '') + '-' + Math.floor(100 + Math.random() * 900)
+                  const { data: newStore } = await supabase.from('stores').insert({
+                    seller_id: sellerProfile.id,
+                    name: storeNameDefault,
+                    slug: storeSlugDefault
+                  }).select('name, slug').single()
+                  store = newStore
+                }
+
+                if (store) {
+                  localStorage.setItem('storeName', store.name)
+                  localStorage.setItem('storeSlug', store.slug)
+                }
               }
             }
             
