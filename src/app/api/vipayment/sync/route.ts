@@ -5,9 +5,15 @@ import { vipReseller } from '@/lib/vipResellerClient'
 export async function POST(request: Request) {
   try {
     // 1. Otorisasi - pastikan yang memanggil adalah Admin
-    const { data: { user }, error: authErr } = await supabase.auth.getUser()
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader) {
+      return NextResponse.json({ status: false, message: 'Unauthorized: Missing token' }, { status: 401 })
+    }
+    const token = authHeader.replace('Bearer ', '')
+
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(token)
     if (!user || authErr) {
-      return NextResponse.json({ status: false, message: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ status: false, message: 'Unauthorized: Invalid token' }, { status: 401 })
     }
 
     const { data: userData } = await supabase.from('users').select('role').eq('id', user.id)

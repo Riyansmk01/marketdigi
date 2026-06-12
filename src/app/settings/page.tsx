@@ -175,9 +175,14 @@ export default function SettingsPage() {
   const handleSyncVIP = async () => {
     setIsSaving(true)
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      
       const res = await fetch('/api/vipayment/sync', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token || ''}`
+        },
         body: JSON.stringify({ type: 'game', markupPercentage: 10 })
       })
       const result = await res.json()
