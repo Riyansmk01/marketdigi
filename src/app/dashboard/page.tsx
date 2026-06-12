@@ -36,6 +36,7 @@ export default function SellerDashboardPage() {
   const [rating, setRating] = useState(5.0)
   const [reviewCount, setReviewCount] = useState(0)
   const [tier, setTier] = useState(0)
+  const [currentStoreId, setCurrentStoreId] = useState<string | null>(null) // Track store ID for product insert
   
   // Listings state
   const [listings, setListings] = useState<any[]>([])
@@ -52,9 +53,16 @@ export default function SellerDashboardPage() {
   const [newProductFulfillment, setNewProductFulfillment] = useState('Akun Digital')
   const [newProductCategory, setNewProductCategory] = useState('Akun Streaming')
 
-  async function loadListings() {
+  async function loadListings(storeId?: string | null) {
     try {
-      const { data, error } = await supabase.from('products').select('*')
+      const sid = storeId || currentStoreId
+      if (!sid) {
+        setListings([])
+        setLoadingListings(false)
+        return
+      }
+      // Only load products belonging to this seller's store
+      const { data, error } = await supabase.from('products').select('*').eq('store_id', sid)
       if (data) {
         setListings(data)
       }
@@ -107,8 +115,12 @@ export default function SellerDashboardPage() {
             if (storeData) {
               setStoreName(storeData.name)
               setStoreSlug(storeData.slug)
+              setCurrentStoreId(storeData.id) // Save store ID for product insert
               localStorage.setItem('storeName', storeData.name)
               localStorage.setItem('storeSlug', storeData.slug)
+              localStorage.setItem('currentStoreId', storeData.id)
+              // Load listings for this store immediately
+              loadListings(storeData.id)
 
               // Query paid orders for this store
               const { data: orders } = await supabase
@@ -171,13 +183,16 @@ export default function SellerDashboardPage() {
               }
             }
           }
-        } catch (err) {
-          console.error('Error loading dashboard stats:', err)
-        }
+      } catch (err) {
+        console.error('Error loading dashboard stats:', err)
+      }
     }
-    loadDashboardData()
-    loadListings()
-  }, [])
+    async function init() {
+      await loadDashboardData()
+    }
+    init()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
 
   function getCategoryFromFulfillmentOrName(name: string, fulfillment: string) {
     const nameLower = name.toLowerCase()
@@ -210,38 +225,76 @@ export default function SellerDashboardPage() {
     if (!newProductName || !newProductPrice) return
 
     const priceNum = Number(newProductPrice)
-    const slug = newProductName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-    const isPromo = newProductName.toLowerCase().includes('promo') || newProductName.toLowerCase().includes('diskon')
-    const badge = isPromo ? 'Promo' : 'Ready'
-
-    const payload = {
-      title: newProductName,
-      price: priceNum,
-      displayPrice: `Rp ${priceNum.toLocaleString('id-ID')}`,
-      badge: badge,
-      fulfillmentType: newProductFulfillment,
-      slug: slug,
-      categoryName: newProductCategory || getCategoryFromFulfillmentOrName(newProductName, newProductFulfillment),
-      seller: {
-        id: 's_current',
-        name: storeName,
-        slug: storeSlug,
-        ratingAvg: 5.0,
-        reviewCount: 0
-      }
-    }
+    const slug = newProductName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString(36)
+    const categoryName = newProductCategory || getCategoryFromFulfillmentOrName(newProductName, newProductFulfillment)
 
     try {
-      const { data, error } = await supabase.from('products').insert(payload)
+      // 1. Get store_id from state or localStorage
+      let storeId = currentStoreId || localStorage.getItem('currentStoreId')
+      
+      if (!storeId) {
+        // Re-fetch store_id from DB
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: spResult } = await supabase.from('seller_profiles').select('id').eq('user_id', user.id)
+          const sp = Array.isArray(spResult) ? spResult[0] : null
+          if (sp) {
+            const { data: storeResult } = await supabase.from('stores').select('id').eq('seller_id', sp.id)
+            const st = Array.isArray(storeResult) ? storeResult[0] : null
+            if (st) {
+              storeId = st.id
+              setCurrentStoreId(storeId)
+              localStorage.setItem('currentStoreId', storeId as string)
+            }
+          }
+        }
+      }
+
+      if (!storeId) {
+        toast.error('Toko belum ditemukan. Pastikan Anda sudah mendaftar sebagai seller.')
+        return
+      }
+
+      // 2. Find or create category_id
+      let categoryId: string | null = null
+      const { data: catResult } = await supabase.from('categories').select('id').eq('name', categoryName)
+      const existingCat = Array.isArray(catResult) ? catResult[0] : null
+
+      if (existingCat) {
+        categoryId = existingCat.id
+      } else {
+        // Create category if not found
+        const catSlug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+        const { data: newCatResult } = await supabase.from('categories').insert({ name: categoryName, slug: catSlug }).select('id')
+        const newCat = Array.isArray(newCatResult) ? newCatResult[0] : null
+        if (newCat) categoryId = newCat.id
+      }
+
+      // 3. Build proper DB payload (use correct column names)
+      const dbPayload: any = {
+        store_id: storeId,
+        name: newProductName,                           // DB column: 'name'
+        slug: slug,
+        description: `Produk digital: ${newProductName}. Proses instan dan aman.`,
+        price: priceNum,
+        stock_qty: Number(newProductStock) || 50,
+        stock_status: 'Ready',
+        fulfillment_type: newProductFulfillment,        // DB column: 'fulfillment_type'
+        is_published: true
+      }
+      if (categoryId) dbPayload.category_id = categoryId
+
+      // 4. Insert product
+      const { data, error } = await supabase.from('products').insert(dbPayload)
       if (error) {
         toast.error('Gagal menambahkan produk: ' + error.message)
       } else {
         toast.success(`🎉 Produk "${newProductName}" berhasil ditambahkan ke etalase toko Anda!`)
-        loadListings()
+        loadListings(storeId)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      toast.error('Terjadi kesalahan saat menyimpan produk.')
+      toast.error('Terjadi kesalahan: ' + (err.message || 'Silakan coba lagi.'))
     }
 
     setShowAddProductModal(false)
