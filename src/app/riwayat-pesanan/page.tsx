@@ -113,26 +113,26 @@ function OrderHistoryForm() {
         <p style={{ color: 'var(--text-secondary)' }}>Pantau status pengiriman instan dan kelola lisensi digital Anda.</p>
       </div>
 
-      {/* Filter Tabs */}
-      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '2rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
-        {filters.map(filt => (
-          <button
-            key={filt}
-            onClick={() => setActiveFilter(filt)}
-            style={{
-              padding: '0.5rem 1.25rem',
-              borderRadius: '999px',
-              border: activeFilter === filt ? '2px solid var(--accent-color)' : '1px solid var(--glass-border)',
-              background: activeFilter === filt ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
-              color: activeFilter === filt ? 'var(--accent-color)' : 'var(--text-secondary)',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-          >
-            {filt}
-          </button>
-        ))}
+      {/* Filter Tabs - scrollable on mobile */}
+      <div className="overflow-x-auto pb-2" style={{ marginBottom: '2rem', borderBottom: '1px solid var(--glass-border)' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'nowrap', paddingBottom: '0.75rem', minWidth: 'max-content' }}>
+          {filters.map(filt => (
+            <button
+              key={filt}
+              onClick={() => setActiveFilter(filt)}
+              style={{
+                padding: '0.5rem 1.25rem',
+                borderRadius: '999px',
+                border: activeFilter === filt ? '2px solid var(--accent-color)' : '1px solid var(--glass-border)',
+                background: activeFilter === filt ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+                color: activeFilter === filt ? 'var(--accent-color)' : 'var(--text-secondary)',
+                fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap'
+              }}
+            >
+              {filt}
+            </button>
+          ))}
+        </div>
       </div>
 
       {filteredOrders.length === 0 ? (

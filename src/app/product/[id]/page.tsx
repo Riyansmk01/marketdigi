@@ -410,9 +410,9 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         <Link href="/" style={{ textDecoration: 'underline' }}>Beranda</Link> / <Link href="/products" style={{ textDecoration: 'underline' }}>Kategori</Link> / <strong>Detail Produk</strong>
       </div>
       
-      <div className="product-layout grid grid-cols-2" style={{ gap: '3rem', alignItems: 'flex-start' }}>
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start w-full">
         {/* Kolom Kiri: Gambar & Info */}
-        <div>
+        <div className="w-full lg:w-[65%]">
           <div className="product-gallery glass-panel card-3d" style={{ padding: '4rem', textAlign: 'center', background: theme.gradient, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', borderRadius: 'var(--radius-xl)' }}>
             <span style={{ fontSize: '5rem', color: 'white', fontWeight: 900, textShadow: '0 4px 12px rgba(0,0,0,0.3)', letterSpacing: '1px' }}>
               {theme.iconText}
@@ -545,7 +545,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         </div>
         
         {/* Kolom Kanan: Checkout Box */}
-        <div style={{ position: 'sticky', top: '100px' }}>
+        <div className="w-full lg:w-[35%]" style={{ position: 'sticky', top: '100px' }}>
           <div style={{ marginBottom: '2rem' }}>
             <Badge variant="success" className="card-3d" style={{ marginBottom: '1rem' }}>
               {product.stock_qty !== undefined ? (product.stock_qty > 0 ? 'Stok Tersedia' : 'Stok Habis') : 'Stok Tersedia'}

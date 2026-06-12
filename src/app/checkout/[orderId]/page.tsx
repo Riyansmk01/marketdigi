@@ -230,10 +230,10 @@ function CheckoutDetail({ params }: { params: Promise<{ orderId: string }> }) {
           </Link>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '4rem', maxWidth: '950px', width: '100%', alignItems: 'flex-start' }}>
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12 w-full max-w-[950px] items-start">
           
           {/* Left Side: QRIS Code Image */}
-          <div className="glass-panel card-3d" style={{ padding: '2.5rem', background: 'var(--bg-secondary)', textAlign: 'center', borderRadius: 'var(--radius-lg)' }}>
+          <div className="glass-panel card-3d w-full md:w-[55%]" style={{ padding: '2.5rem', background: 'var(--bg-secondary)', textAlign: 'center', borderRadius: 'var(--radius-lg)' }}>
             <h3 style={{ fontWeight: '900', fontSize: '1.4rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Scan QRIS Dinamis</h3>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Dukungan Semua Aplikasi E-Wallet & Bank</span>
 
@@ -251,7 +251,7 @@ function CheckoutDetail({ params }: { params: Promise<{ orderId: string }> }) {
           </div>
 
           {/* Right Side: Invoice details & amount */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div className="w-full md:w-[45%] flex flex-col gap-8">
             <div className="glass-panel card-3d" style={{ padding: '2rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.25rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem' }}>Detail Pembayaran</h3>
               

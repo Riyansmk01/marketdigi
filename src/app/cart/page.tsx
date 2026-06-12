@@ -112,9 +112,9 @@ export default function CartPage() {
           </Link>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '3rem', alignItems: 'flex-start' }}>
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start w-full">
           {/* Cart Items List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="w-full lg:w-[60%] flex flex-col gap-6">
             {cartItems.map(item => (
               <div key={item.id} className="glass-panel card-3d" style={{ display: 'flex', gap: '1.5rem', padding: '1.5rem', alignItems: 'center', position: 'relative' }}>
                 <div style={{ fontSize: '3rem', width: '70px', height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
@@ -166,7 +166,7 @@ export default function CartPage() {
           </div>
 
           {/* Cart Summary */}
-          <div className="glass-panel card-3d" style={{ padding: '2rem', background: 'var(--bg-secondary)', position: 'sticky', top: '100px' }}>
+          <div className="glass-panel card-3d w-full lg:w-[40%]" style={{ padding: '2rem', background: 'var(--bg-secondary)', position: 'sticky', top: '100px' }}>
             <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem' }}>Ringkasan Pembayaran</h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', fontSize: '0.95rem' }}>

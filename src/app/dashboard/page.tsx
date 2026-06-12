@@ -431,9 +431,9 @@ export default function SellerDashboardPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '3rem', alignItems: 'flex-start' }}>
+      <div className="flex flex-col lg:flex-row gap-8 items-start w-full">
         {/* Left Table: Product Catalog Management */}
-        <div className="glass-panel card-3d" style={{ padding: '2rem', background: 'var(--bg-secondary)' }}>
+        <div className="glass-panel card-3d w-full lg:w-[60%]" style={{ padding: '2rem', background: 'var(--bg-secondary)' }}>
           <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '1.5rem' }}>Manajemen Etalase Produk</h3>
 
           <div style={{ overflowX: 'auto' }}>
@@ -486,7 +486,7 @@ export default function SellerDashboardPage() {
         </div>
 
         {/* Right Section: Incoming Orders notifications */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div className="w-full lg:w-[40%] flex flex-col gap-8">
           
           <div className="glass-panel card-3d" style={{ padding: '2rem', background: 'var(--bg-secondary)' }}>
             <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '1.25rem' }}>🔔 Pesanan Masuk (Fulfillment)</h3>

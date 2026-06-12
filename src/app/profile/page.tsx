@@ -162,10 +162,10 @@ export default function ProfilePage() {
 
   return (
     <div className="container" style={{ padding: '4rem 1.5rem', minHeight: '80vh' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '0.8fr 1.2fr', gap: '3rem', alignItems: 'flex-start' }}>
+      <div className="flex flex-col md:flex-row gap-8 items-start w-full">
         
         {/* Left Card: Account Summary */}
-        <div className="glass-panel card-3d" style={{ padding: '2.5rem', background: 'var(--bg-secondary)', textAlign: 'center' }}>
+        <div className="glass-panel card-3d w-full md:w-[40%]" style={{ padding: '2.5rem', background: 'var(--bg-secondary)', textAlign: 'center' }}>
           <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent-color), #818cf8)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '2.5rem', margin: '0 auto 1.5rem auto', boxShadow: 'inset 0 4px 6px rgba(255,255,255,0.4), 0 8px 16px rgba(99,102,241,0.2)' }}>
             {email.substring(0, 2).toUpperCase()}
           </div>
@@ -205,7 +205,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Right Section: Purchase History & Active Items */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div className="w-full md:w-[60%] flex flex-col gap-8">
           
           {/* Active Licenses Section */}
           <div className="glass-panel card-3d" style={{ padding: '2rem', background: 'var(--bg-secondary)' }}>

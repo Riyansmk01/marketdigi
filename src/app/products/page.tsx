@@ -134,8 +134,8 @@ function ProductsCatalog() {
   })
 
   return (
-    <div className="container" style={{ padding: '2rem 1.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
+    <div className="container" style={{ padding: '4rem 1.5rem', minHeight: '80vh' }}>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
         <div>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             <span>Eksplorasi Produk</span>
@@ -190,12 +190,12 @@ function ProductsCatalog() {
         </select>
       </div>
 
-      <div style={{ display: 'flex', gap: '2rem' }}>
+      <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar Filter 3D */}
-        <aside style={{ width: '280px', flexShrink: 0 }}>
+        <aside className="w-full md:w-[280px] flex-shrink-0">
           <div className="glass-panel" style={{ padding: '1.5rem', position: 'sticky', top: '100px' }}>
             <h3 style={{ marginBottom: '1.25rem', fontWeight: 700 }}>Filter Kategori</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '2rem' }}>
+            <div className="flex flex-row md:flex-col gap-3 mb-8 overflow-x-auto pb-2">
               {(() => {
                 const categoryIcons: Record<string, string> = {
                   'Akun Streaming': '📺',
@@ -213,9 +213,8 @@ function ProductsCatalog() {
                     <button
                       key={cat}
                       onClick={() => handleCategoryClick(cat)}
-                      className={isActive ? 'btn btn-primary btn-3d' : 'btn btn-secondary btn-3d'}
+                      className={`btn-3d flex-shrink-0 ${isActive ? 'btn-primary' : 'btn-secondary'}`}
                       style={{
-                        width: '100%',
                         padding: '0.75rem 1rem',
                         borderRadius: 'var(--radius-lg)',
                         fontWeight: isActive ? '800' : '500',

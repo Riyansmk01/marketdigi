@@ -57,14 +57,24 @@ export default function SettingsPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          const { data: userData } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-          
-          if (userData && userData.role) {
-            setUserRole(userData.role)
+          // Read role from localStorage first for instant render
+          const cachedRole = localStorage.getItem('userRole') || 'buyer'
+          setUserRole(cachedRole)
+
+          // Then confirm from DB (users table, not profiles)
+          try {
+            const { data: userData } = await supabase
+              .from('users')
+              .select('role')
+              .eq('id', user.id)
+              .single()
+            
+            if (userData && userData.role) {
+              setUserRole(userData.role)
+              localStorage.setItem('userRole', userData.role)
+            }
+          } catch (_) {
+            // silently ignore, keep cached role
           }
 
           const { data: spResult } = await supabase
@@ -180,11 +190,11 @@ export default function SettingsPage() {
         <p style={{ color: 'var(--text-secondary)' }}>Kelola data pribadi, kata sandi, preferensi notifikasi, dan API pengiriman instan Anda.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '3rem', alignItems: 'flex-start' }}>
+      <div className="flex flex-col md:flex-row gap-8 items-start w-full">
         {/* Navigation Sidebar */}
-        <aside className="glass-panel" style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <li>
+        <aside className="glass-panel w-full md:w-[250px] flex-shrink-0" style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
+          <ul className="flex flex-row md:flex-col gap-2 overflow-x-auto pb-2 md:pb-0" style={{ listStyle: 'none' }}>
+            <li className="flex-shrink-0">
               <button
                 onClick={() => setActiveTab('profile')}
                 style={{
@@ -203,7 +213,7 @@ export default function SettingsPage() {
                 👤 Data Profil
               </button>
             </li>
-            <li>
+            <li className="flex-shrink-0">
               <button
                 onClick={() => setActiveTab('security')}
                 style={{
@@ -222,7 +232,7 @@ export default function SettingsPage() {
                 🔒 Keamanan & Sandi
               </button>
             </li>
-            <li>
+            <li className="flex-shrink-0">
               <button
                 onClick={() => setActiveTab('bank')}
                 style={{
@@ -241,7 +251,7 @@ export default function SettingsPage() {
                 🏦 Rekening Bank
               </button>
             </li>
-            <li>
+            <li className="flex-shrink-0">
               <button
                 onClick={() => setActiveTab('developer')}
                 style={{
@@ -261,7 +271,7 @@ export default function SettingsPage() {
               </button>
             </li>
             {userRole === 'admin' && (
-              <li>
+              <li className="flex-shrink-0">
                 <button
                   onClick={() => setActiveTab('admin')}
                   style={{
@@ -284,11 +294,13 @@ export default function SettingsPage() {
           </ul>
         </aside>
 
-        {/* Content Box */}
-        <div className="glass-panel card-3d" style={{ padding: '2.5rem', background: 'var(--bg-secondary)' }}>
-          {activeTab === 'profile' && (
-            <form onSubmit={handleProfileSave}>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem' }}>Informasi Profil</h3>
+        {/* Main Content Area */}
+        <div className="w-full flex-1">
+          {/* Content Box */}
+          <div className="glass-panel card-3d" style={{ padding: '2.5rem', background: 'var(--bg-secondary)' }}>
+            {activeTab === 'profile' && (
+              <form onSubmit={handleProfileSave}>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem' }}>Informasi Profil</h3>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
                 <Input 
@@ -501,6 +513,7 @@ export default function SettingsPage() {
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

@@ -212,11 +212,12 @@ function ChatForm() {
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Diskusikan produk dengan penjual atau hubungi support sistem Trade Guard.</p>
       </div>
 
-      <div className="glass-panel" style={{ flex: 1, display: 'grid', gridTemplateColumns: '320px 1fr', overflow: 'hidden', borderRadius: 'var(--radius-lg)', background: 'var(--bg-secondary)' }}>
+      <div className="glass-panel flex flex-col md:flex-row" style={{ flex: 1, overflow: 'hidden', borderRadius: 'var(--radius-lg)', background: 'var(--bg-secondary)', minHeight: 0 }}>
         
-        {/* Left Side: Contact List */}
-        <aside style={{ borderRight: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
-          <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--glass-border)' }}>
+        {/* Contact List - horizontal on mobile, vertical sidebar on desktop */}
+        <aside className="w-full md:w-[300px] flex-shrink-0 flex flex-col" style={{ borderBottom: '1px solid var(--glass-border)', overflowY: 'hidden' }}>
+          {/* Desktop search bar */}
+          <div className="hidden md:block" style={{ padding: '1.25rem', borderBottom: '1px solid var(--glass-border)', flexShrink: 0 }}>
             <input 
               type="text" 
               placeholder="Cari percakapan..." 
@@ -226,7 +227,30 @@ function ChatForm() {
             />
           </div>
 
-          <div style={{ flex: 1 }}>
+          {/* Mobile: horizontal scroll contact chips */}
+          <div className="flex md:hidden flex-row overflow-x-auto gap-2 p-3" style={{ flexShrink: 0, borderBottom: '1px solid var(--glass-border)', background: 'var(--bg-primary)' }}>
+            {contacts.map(contact => (
+              <button
+                key={contact.id}
+                onClick={() => setActiveContactId(contact.id)}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.3rem',
+                  padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-md)', flexShrink: 0,
+                  background: activeContactId === contact.id ? 'rgba(99,102,241,0.12)' : 'transparent',
+                  border: activeContactId === contact.id ? '2px solid var(--accent-color)' : '2px solid transparent',
+                  cursor: 'pointer', transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: contact.id === 'TradeGuard' ? 'linear-gradient(135deg, #4f46e5, #4338ca)' : 'linear-gradient(135deg, #10b981, #059669)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1rem' }}>
+                  {contact.avatar}
+                </div>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', maxWidth: '60px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{contact.name}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Desktop: contact list items */}
+          <div className="hidden md:flex flex-col overflow-y-auto flex-1">
             {loading ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Memuat percakapan...</div>
             ) : contacts.length === 0 ? (
@@ -245,14 +269,10 @@ function ChatForm() {
                     key={contact.id}
                     onClick={() => setActiveContactId(contact.id)}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      padding: '1.25rem',
+                      display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
                       cursor: 'pointer',
                       background: activeContactId === contact.id ? 'rgba(99, 102, 241, 0.08)' : 'transparent',
-                      borderBottom: '1px solid var(--glass-border)',
-                      transition: 'background 0.2s'
+                      borderBottom: '1px solid var(--glass-border)', transition: 'background 0.2s'
                     }}
                   >
                     <div style={{ width: '45px', height: '45px', borderRadius: '50%', background: contact.id === 'TradeGuard' ? 'linear-gradient(135deg, #4f46e5, #4338ca)' : 'linear-gradient(135deg, #10b981, #059669)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1rem', flexShrink: 0 }}>
@@ -274,12 +294,12 @@ function ChatForm() {
         </aside>
 
         {/* Right Side: Chat Window */}
-        <section style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <section className="flex flex-col flex-1" style={{ minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
           {activeContact ? (
             <>
               {/* Header */}
-              <div style={{ padding: '1.25rem 2rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--bg-primary)' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: activeContact.id === 'TradeGuard' ? 'linear-gradient(135deg, #4f46e5, #4338ca)' : 'linear-gradient(135deg, #10b981, #059669)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+              <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--bg-primary)', flexShrink: 0 }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: activeContact.id === 'TradeGuard' ? 'linear-gradient(135deg, #4f46e5, #4338ca)' : 'linear-gradient(135deg, #10b981, #059669)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>
                   {activeContact.avatar}
                 </div>
                 <div>
@@ -289,25 +309,19 @@ function ChatForm() {
               </div>
 
               {/* Messages Container */}
-              <div style={{ flex: 1, padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.25rem', background: 'radial-gradient(circle at 10% 90%, rgba(99,102,241,0.02) 0%, rgba(0,0,0,0) 60%)' }}>
+              <div style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.25rem', background: 'radial-gradient(circle at 10% 90%, rgba(99,102,241,0.02) 0%, rgba(0,0,0,0) 60%)', minHeight: 0 }}>
                 {activeContact.messages.map((msg, index) => (
                   <div 
                     key={msg.id || index}
-                    style={{
-                      display: 'flex',
-                      justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start'
-                    }}
+                    style={{ display: 'flex', justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start' }}
                   >
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '70%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '75%' }}>
                       <div style={{
                         padding: '0.85rem 1.25rem',
                         borderRadius: msg.sender === 'user' ? '1.25rem 1.25rem 0 1.25rem' : '1.25rem 1.25rem 1.25rem 0',
                         background: msg.sender === 'user' ? 'var(--accent-color)' : 'var(--bg-primary)',
                         color: msg.sender === 'user' ? 'white' : 'var(--text-primary)',
-                        boxShadow: 'var(--shadow-sm)',
-                        fontWeight: 500,
-                        fontSize: '0.95rem',
-                        whiteSpace: 'pre-wrap'
+                        boxShadow: 'var(--shadow-sm)', fontWeight: 500, fontSize: '0.95rem', whiteSpace: 'pre-wrap'
                       }}>
                         {msg.text}
                       </div>
@@ -319,31 +333,22 @@ function ChatForm() {
               </div>
 
               {/* Input Box */}
-              <form onSubmit={handleSendMessage} style={{ padding: '1.25rem 2rem', borderTop: '1px solid var(--glass-border)', display: 'flex', gap: '1rem', background: 'var(--bg-primary)' }}>
+              <form onSubmit={handleSendMessage} style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--glass-border)', display: 'flex', gap: '0.75rem', background: 'var(--bg-primary)', flexShrink: 0 }}>
                 <input 
                   type="text" 
                   placeholder="Tulis pesan..." 
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  style={{
-                    flex: 1,
-                    padding: '0.85rem 1.5rem',
-                    borderRadius: '999px',
-                    border: '1px solid var(--glass-border)',
-                    background: 'var(--bg-secondary)',
-                    color: 'var(--text-primary)',
-                    outline: 'none',
-                    fontSize: '0.95rem'
-                  }}
+                  style={{ flex: 1, padding: '0.85rem 1.25rem', borderRadius: '999px', border: '1px solid var(--glass-border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.95rem', minWidth: 0 }}
                 />
-                <Button type="submit" variant="primary" className="btn-3d" style={{ borderRadius: '999px', padding: '0.85rem 1.5rem' }}>
+                <Button type="submit" variant="primary" className="btn-3d" style={{ borderRadius: '999px', padding: '0.85rem 1.25rem', flexShrink: 0 }}>
                   Kirim
                 </Button>
               </form>
             </>
           ) : (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-              Pilih percakapan untuk memulai chat.
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontStyle: 'italic', padding: '2rem', textAlign: 'center' }}>
+              Pilih percakapan di atas untuk memulai chat.
             </div>
           )}
         </section>
