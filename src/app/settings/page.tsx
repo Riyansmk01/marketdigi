@@ -9,11 +9,13 @@ import { supabase } from '@/lib/supabaseClient'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'developer' | 'bank'>('profile')
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'developer' | 'bank' | 'admin'>('profile')
+  const [userRole, setUserRole] = useState('buyer')
   const [email, setEmail] = useState('')
   const [name, setName] = useState('Pengguna Marketdigi')
   const [phone, setPhone] = useState('081234567890')
   const [apiKey, setApiKey] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
   
   // Bank Verification & Tier States
   const [bankName, setBankName] = useState('')
@@ -55,6 +57,16 @@ export default function SettingsPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
+          const { data: userData } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+          
+          if (userData && userData.role) {
+            setUserRole(userData.role)
+          }
+
           const { data: spResult } = await supabase
             .from('seller_profiles')
             .select('bank_name, bank_account_no, bank_account_name, bank_verified, tier')
@@ -138,6 +150,27 @@ export default function SettingsPage() {
         }, 1500)
       }, 1500)
     }, 1500)
+  }
+
+  const handleSyncVIP = async () => {
+    setIsSaving(true)
+    try {
+      const res = await fetch('/api/vipayment/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'game', markupPercentage: 10 })
+      })
+      const result = await res.json()
+      if (res.ok && result.status) {
+        toast.success(`Sinkronisasi berhasil! ${result.total} produk Top Up ditambahkan/diperbarui.`)
+      } else {
+        toast.error(result.message || 'Gagal melakukan sinkronisasi')
+      }
+    } catch (err: any) {
+      toast.error('Gagal terhubung ke server')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -227,6 +260,27 @@ export default function SettingsPage() {
                 🛠️ Mode Pengembang (API)
               </button>
             </li>
+            {userRole === 'admin' && (
+              <li>
+                <button
+                  onClick={() => setActiveTab('admin')}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '0.75rem 1rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: 'none',
+                    background: activeTab === 'admin' ? 'var(--accent-color)' : 'transparent',
+                    color: activeTab === 'admin' ? 'white' : 'var(--danger)',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  ⚡ Admin Panel
+                </button>
+              </li>
+            )}
           </ul>
         </aside>
 
@@ -424,6 +478,27 @@ export default function SettingsPage() {
                   )}
                 </form>
               )}
+            </div>
+          )}
+
+          {/* Admin Tools Tab */}
+          {activeTab === 'admin' && userRole === 'admin' && (
+            <div className="glass-panel card-3d" style={{ padding: '2rem', background: 'var(--bg-secondary)' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--accent-color)' }}>Pengaturan Admin</h2>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Pusat kendali integrasi dan sinkronisasi data sistem MarketDigi.</p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
+                  <h3 style={{ fontWeight: 800, marginBottom: '0.5rem' }}>Integrasi Layanan VIP Reseller</h3>
+                  <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                    Tarik ribuan produk terbaru (seperti Mobile Legends, PUBG, dll) langsung dari API VIP Reseller. 
+                    Produk akan secara otomatis dimasukkan ke tabel "products" toko Anda (sebagai Admin) dengan markup harga +10%.
+                  </p>
+                  <Button onClick={handleSyncVIP} disabled={isSaving} variant="primary" style={{ padding: '0.75rem 1.5rem', fontWeight: 'bold' }}>
+                    {isSaving ? 'Menyinkronkan Data...' : '🔄 Sinkronisasi Produk Top Up'}
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </div>

@@ -25,6 +25,50 @@ export class VipResellerClient {
   }
 
   /**
+   * Ambil Daftar Layanan (Prepaid / PPOB / Pulsa / Data)
+   */
+  async getPrepaidServices(filterType?: string, filterValue?: string) {
+    const payload: any = {
+      key: this.apiKey,
+      sign: this.getSignature(),
+      type: 'services'
+    }
+    if (filterType && filterValue) {
+      payload.filter_type = filterType
+      payload.filter_value = filterValue
+    }
+
+    const response = await fetch(`${this.apiUrl}/prepaid`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(payload)
+    })
+    return response.json()
+  }
+
+  /**
+   * Ambil Daftar Layanan Game Feature
+   */
+  async getGameFeatureServices(filterType?: string, filterValue?: string) {
+    const payload: any = {
+      key: this.apiKey,
+      sign: this.getSignature(),
+      type: 'services'
+    }
+    if (filterType && filterValue) {
+      payload.filter_type = filterType
+      payload.filter_value = filterValue
+    }
+
+    const response = await fetch(`${this.apiUrl}/game-feature`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(payload)
+    })
+    return response.json()
+  }
+
+  /**
    * Order Prepaid (Pulsa, Paket Data, PPOB)
    */
   async orderPrepaid(serviceCode: string, targetData: string) {
