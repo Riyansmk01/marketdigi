@@ -42,13 +42,15 @@ export async function GET(request: Request) {
     }
 
     // 2. Fallback: Query klikqris.com directly
-    const url = `https://klikqris.com/api/qrisv2/status/177929799620/${order_id}`
+    const apiKey = process.env.KLIKQRIS_API_KEY || ''
+    const merchantId = process.env.KLIKQRIS_MERCHANT_ID || ''
+    const url = `https://klikqris.com/api/qrisv2/status/${merchantId}/${order_id}`
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'x-api-key': 'QDHKVXNSOHPdJbKWACwFieYWXsHH8Vmhdr2SKQXP',
-        'id_merchant': '177929799620'
+        'x-api-key': apiKey,
+        'id_merchant': merchantId
       }
     })
 

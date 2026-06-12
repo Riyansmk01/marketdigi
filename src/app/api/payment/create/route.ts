@@ -10,9 +10,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ status: false, message: 'Amount and order_id are required' }, { status: 400 })
     }
 
+    const apiKey = process.env.KLIKQRIS_API_KEY || ''
+    const merchantId = process.env.KLIKQRIS_MERCHANT_ID || ''
+
     const payload = {
       order_id: order_id,
-      id_merchant: '177929799620',
+      id_merchant: merchantId,
       amount: Number(amount),
       keterangan: keterangan || 'Pembayaran Produk Digital Marketdigi'
     }
@@ -21,8 +24,8 @@ export async function POST(request: Request) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': 'QDHKVXNSOHPdJbKWACwFieYWXsHH8Vmhdr2SKQXP',
-        'id_merchant': '177929799620'
+        'x-api-key': apiKey,
+        'id_merchant': merchantId
       },
       body: JSON.stringify(payload)
     })
