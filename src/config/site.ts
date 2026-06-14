@@ -41,7 +41,6 @@ export const siteConfig = {
     {
       title: "Seller",
       items: [
-        { title: "Buka Toko", href: "/register?role=seller" },
         { title: "Seller Center", href: "/dashboard" },
       ],
     },
