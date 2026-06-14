@@ -361,7 +361,6 @@ function RegisterForm() {
           )}
         </div>
       </div>
-    </div>
   )
 }
 
