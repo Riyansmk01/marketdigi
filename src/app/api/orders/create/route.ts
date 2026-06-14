@@ -3,7 +3,12 @@ import { supabase } from '@/lib/supabaseClient'
 
 export async function POST(request: Request) {
   try {
-    const { data: { user }, error: authErr } = await supabase.auth.getUser()
+    const authHeader = request.headers.get('authorization')
+    const token = authHeader ? authHeader.replace('Bearer ', '') : undefined
+    const { data: { user }, error: authErr } = token 
+      ? await supabase.auth.getUser(token)
+      : await supabase.auth.getUser()
+      
     if (authErr || !user) {
       return NextResponse.json({ status: false, message: 'Harap login terlebih dahulu untuk membuat pesanan.' }, { status: 401 })
     }

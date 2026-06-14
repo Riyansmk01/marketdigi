@@ -130,7 +130,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     try {
       const { data: productResult, error } = await supabase
         .from('products')
-        .select('*')
+        .select('*, stores(*, seller_profiles(user_id))')
         .eq('id', id)
       const data = Array.isArray(productResult) ? productResult[0] : null
       if (data) {
@@ -308,6 +308,14 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
   const handleBuyNow = async () => {
     setIsProcessingBuy(true)
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) {
+        toast.error('Silakan login terlebih dahulu untuk checkout.')
+        router.push('/login')
+        setIsProcessingBuy(false)
+        return
+      }
+
       const items = [{
         id: product.id,
         title: productNameDisplay + (selectedVariant ? ` (${selectedVariant})` : ''),
@@ -318,39 +326,66 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         icon: theme.iconText === 'Windows' ? '💻' : theme.iconText === 'Netflix' ? '📺' : theme.iconText === 'Spotify' ? '🎵' : theme.iconText === 'Canva' ? '🎨' : '📦'
       }]
 
-      const response = await fetch('/api/orders/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: items,
-          subtotal: totalPrice,
-          serviceFee: 2500,
-          total: totalPrice + 2500,
-          paymentMethod: 'QRIS'
-        })
-      })
+      // Generate Invoice Number
+      const dateObj = new Date()
+      const invoiceNo = 'INV-' + dateObj.getFullYear() + (dateObj.getMonth() + 1).toString().padStart(2, '0') + dateObj.getDate().toString().padStart(2, '0') + '-' + Math.floor(1000 + Math.random() * 9000)
 
-      const result = await response.json()
-      
-      if (!response.ok || !result.status) {
-        if (response.status === 401) {
-          toast.error('Silakan login terlebih dahulu untuk checkout.')
-          router.push('/login')
-        } else {
-          toast.error(result.message || 'Gagal membuat pesanan')
+      const storeId = product.store_id || 1
+
+      const orderPayload = {
+        buyer_id: session.user.id,
+        store_id: storeId,
+        invoice_no: invoiceNo,
+        subtotal: totalPrice,
+        service_fee: 2500,
+        total: totalPrice + 2500,
+        status: 'Proses'
+      }
+
+      const { data: newOrderResult, error: insertOrderErr } = await supabase
+        .from('orders')
+        .insert(orderPayload)
+        .select('id, invoice_no, total, status, created_at')
+
+      const newOrder = Array.isArray(newOrderResult) ? newOrderResult[0] : null
+
+      if (insertOrderErr || !newOrder) {
+        throw new Error('Gagal menyimpan pesanan ke database.')
+      }
+
+      const orderItemsPayload = items.map((item: any) => ({
+        order_id: newOrder.id,
+        product_id: item.id,
+        qty: Number(item.qty),
+        price: Number(item.price),
+        custom_payload: {
+          variant: item.variant,
+          customFields: {},
+          note: item.note
         }
-        setIsProcessingBuy(false)
-        return
+      }))
+
+      await supabase.from('order_items').insert(orderItemsPayload)
+
+      const responseData = {
+        id: newOrder.id,
+        invoiceNo: newOrder.invoice_no,
+        items: items,
+        subtotal: totalPrice,
+        serviceFee: 2500,
+        total: totalPrice + 2500,
+        paymentMethod: 'QRIS',
+        status: newOrder.status,
+        createdAt: newOrder.created_at || new Date().toISOString()
       }
 
       const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
-      const newOrder = result.data
-      localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]))
+      localStorage.setItem('orders', JSON.stringify([responseData, ...existingOrders]))
       
       router.push(`/checkout/${newOrder.id}`)
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      toast.error('Terjadi kesalahan saat memproses pesanan')
+      toast.error(err.message || 'Terjadi kesalahan saat memproses pesanan')
       setIsProcessingBuy(false)
     }
   }
@@ -413,11 +448,28 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start w-full">
         {/* Kolom Kiri: Gambar & Info */}
         <div className="w-full lg:w-[65%]">
-          <div className="product-gallery glass-panel card-3d" style={{ padding: '4rem', textAlign: 'center', background: theme.gradient, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', borderRadius: 'var(--radius-xl)' }}>
-            <span style={{ fontSize: '5rem', color: 'white', fontWeight: 900, textShadow: '0 4px 12px rgba(0,0,0,0.3)', letterSpacing: '1px' }}>
-              {theme.iconText}
-            </span>
-          </div>
+          {product.image_urls && product.image_urls.length > 0 ? (
+            <div className="product-gallery" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="glass-panel card-3d" style={{ padding: '0', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', borderRadius: 'var(--radius-xl)' }}>
+                <img src={product.image_urls[0]} alt={productNameDisplay} style={{ width: '100%', height: 'auto', objectFit: 'cover' }} />
+              </div>
+              {product.image_urls.length > 1 && (
+                <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                  {product.image_urls.map((url: string, idx: number) => (
+                    <div key={idx} className="glass-panel card-3d" style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, cursor: 'pointer' }}>
+                      <img src={url} alt={`${productNameDisplay} ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="product-gallery glass-panel card-3d" style={{ padding: '4rem', textAlign: 'center', background: theme.gradient, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', borderRadius: 'var(--radius-xl)' }}>
+              <span style={{ fontSize: '5rem', color: 'white', fontWeight: 900, textShadow: '0 4px 12px rgba(0,0,0,0.3)', letterSpacing: '1px' }}>
+                {theme.iconText}
+              </span>
+            </div>
+          )}
           
           <div className="product-info" style={{ marginTop: '3rem' }}>
             {/* Tabs */}
@@ -563,7 +615,11 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 <div style={{ fontWeight: '800', fontSize: '1.1rem' }}>{product.seller?.name || 'SoftTech Official'} <span style={{ fontSize: '0.9rem' }}>✔️</span></div>
                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>⭐ {sellerStats.ratingAvg > 0 ? sellerStats.ratingAvg : '0.0'} ({sellerStats.reviewCount} Ulasan) • Aktif Baru Saja</div>
               </div>
-              <Button onClick={() => router.push(`/pesan?toko=${encodeURIComponent(product.seller?.name || 'SoftTech')}`)} variant="secondary" size="sm" className="btn-3d">Chat</Button>
+              <Button onClick={() => {
+                const targetId = product.stores?.seller_profiles?.user_id || '';
+                const targetName = product.stores?.name || 'Seller';
+                router.push(`/pesan?targetUserId=${encodeURIComponent(targetId)}&targetName=${encodeURIComponent(targetName)}`);
+              }} variant="secondary" size="sm" className="btn-3d">Chat</Button>
             </div>
           </div>
 

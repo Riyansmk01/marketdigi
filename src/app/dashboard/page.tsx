@@ -52,6 +52,8 @@ export default function SellerDashboardPage() {
   const [newProductStock, setNewProductStock] = useState('50')
   const [newProductFulfillment, setNewProductFulfillment] = useState('Akun Digital')
   const [newProductCategory, setNewProductCategory] = useState('Akun Streaming')
+  const [productImages, setProductImages] = useState<File[]>([])
+  const [isUploading, setIsUploading] = useState(false)
 
   async function loadListings(storeId?: string | null) {
     try {
@@ -245,9 +247,26 @@ export default function SellerDashboardPage() {
     return 'Voucher Digital'
   }
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files)
+      if (productImages.length + selectedFiles.length > 6) {
+        toast.error('Maksimal 6 foto produk yang diperbolehkan.')
+        return
+      }
+      setProductImages(prev => [...prev, ...selectedFiles])
+    }
+  }
+
+  const handleRemoveImage = (index: number) => {
+    setProductImages(prev => prev.filter((_, i) => i !== index))
+  }
+
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newProductName || !newProductPrice) return
+
+    setIsUploading(true)
 
     const priceNum = Number(newProductPrice)
     const slug = newProductName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString(36)
@@ -319,7 +338,35 @@ export default function SellerDashboardPage() {
         if (newCat) categoryId = newCat.id
       }
 
-      // 3. Build proper DB payload (use correct column names)
+      // 3. Upload images if any
+      const uploadedUrls: string[] = []
+      if (productImages.length > 0) {
+        for (const file of productImages) {
+          const fileExt = file.name.split('.').pop()
+          const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
+          const filePath = `${storeId}/${fileName}`
+          
+          const { error: uploadError } = await supabase.storage
+            .from('product_images')
+            .upload(filePath, file)
+            
+          if (uploadError) {
+            console.error('Upload Error:', uploadError)
+            toast.error(`Gagal mengunggah gambar ${file.name}: ${uploadError.message}`)
+            continue
+          }
+          
+          const { data: publicUrlData } = supabase.storage
+            .from('product_images')
+            .getPublicUrl(filePath)
+            
+          if (publicUrlData && publicUrlData.publicUrl) {
+            uploadedUrls.push(publicUrlData.publicUrl)
+          }
+        }
+      }
+
+      // 4. Build proper DB payload (use correct column names)
       const dbPayload: any = {
         store_id: storeId,
         name: newProductName,                           // DB column: 'name'
@@ -329,7 +376,8 @@ export default function SellerDashboardPage() {
         stock_qty: Number(newProductStock) || 50,
         stock_status: 'Ready',
         fulfillment_type: newProductFulfillment,        // DB column: 'fulfillment_type'
-        is_published: true
+        is_published: true,
+        image_urls: uploadedUrls
       }
       if (categoryId) dbPayload.category_id = categoryId
 
@@ -344,6 +392,8 @@ export default function SellerDashboardPage() {
     } catch (err: any) {
       console.error(err)
       toast.error('Terjadi kesalahan: ' + (err.message || 'Silakan coba lagi.'))
+    } finally {
+      setIsUploading(false)
     }
 
     setShowAddProductModal(false)
@@ -351,6 +401,7 @@ export default function SellerDashboardPage() {
     setNewProductPrice('')
     setNewProductStock('50')
     setNewProductCategory('Akun Streaming')
+    setProductImages([])
   }
 
   const handleDeleteProduct = async (id: string) => {
@@ -598,9 +649,37 @@ export default function SellerDashboardPage() {
                 </select>
               </div>
 
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Foto Produk (Maks 6)</span>
+                  <span>{productImages.length}/6</span>
+                </label>
+                {productImages.length < 6 && (
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    multiple 
+                    onChange={handleImageChange}
+                    style={{ fontSize: '0.85rem', padding: '0.5rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--glass-border)' }}
+                  />
+                )}
+                {productImages.length > 0 && (
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                    {productImages.map((file, idx) => (
+                      <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                        <img src={URL.createObjectURL(file)} alt={`preview-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button type="button" onClick={() => handleRemoveImage(idx)} style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', borderRadius: '0 0 0 4px', width: '20px', height: '20px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                <Button type="button" onClick={() => setShowAddProductModal(false)} variant="secondary">Batal</Button>
-                <Button type="submit" variant="primary" className="btn-3d">Simpan Produk</Button>
+                <Button type="button" onClick={() => setShowAddProductModal(false)} variant="secondary" disabled={isUploading}>Batal</Button>
+                <Button type="submit" variant="primary" className="btn-3d" disabled={isUploading}>
+                  {isUploading ? 'Menyimpan...' : 'Simpan Produk'}
+                </Button>
               </div>
             </form>
           </div>

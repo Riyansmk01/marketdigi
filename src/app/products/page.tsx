@@ -45,8 +45,8 @@ function ProductsCatalog() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        // Only fetch published products
-        const { data, error } = await supabase.from('products').select('*').eq('is_published', true)
+        // Fetch published products and join stores table for seller details
+        const { data, error } = await supabase.from('products').select('*, stores(name, slug)').eq('is_published', true)
         if (data) {
           // Fetch active reviews to calculate rating details dynamically
           const { data: reviewsData } = await supabase
@@ -73,7 +73,11 @@ function ProductsCatalog() {
               title: p.name || p.title || 'Produk Digital',
               categoryName: p.categoryName || p.categories?.name || '',
               ratingAvg: stats.count > 0 ? stats.sum / stats.count : 0,
-              reviewCount: stats.count
+              reviewCount: stats.count,
+              seller: {
+                name: p.stores?.name || 'Toko',
+                slug: p.stores?.slug || ''
+              }
             }
           })
           setProducts(mapped)
@@ -134,42 +138,46 @@ function ProductsCatalog() {
   })
 
   return (
-    <div className="container" style={{ padding: '4rem 1.5rem', minHeight: '80vh' }}>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
-        <div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <span>Eksplorasi Produk</span>
-            {categoryParam && (
-              <button 
-                onClick={() => router.push('/products')}
-                className="btn btn-primary"
-                style={{ 
-                  fontSize: '0.8rem', 
-                  fontWeight: 'bold', 
-                  padding: '0.4rem 0.85rem', 
-                  borderRadius: '999px', 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: '0.4rem', 
-                  cursor: 'pointer',
-                  textTransform: 'none',
-                  letterSpacing: 'normal'
-                }}
-              >
-                🏷️ {categoryParam} <strong style={{ marginLeft: '0.2rem', color: '#fca5a5' }}>✕</strong>
-              </button>
-            )}
-          </h1>
-          <p style={{ color: 'var(--text-secondary)' }}>
+    <div className="container" style={{ padding: '2rem 1.5rem', minHeight: '80vh' }}>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: 0 }}>
             {categoryParam 
-              ? `Menampilkan produk digital terbaik dalam kategori ${categoryParam}.` 
+              ? `Menampilkan produk dalam kategori ${categoryParam}.` 
               : 'Temukan ribuan produk digital, tools, dan layanan terbaik.'}
             {searchParam && ` Menampilkan hasil pencarian untuk "${searchParam}".`}
           </p>
+          {categoryParam && (
+            <button 
+              onClick={() => router.push('/products')}
+              style={{ 
+                fontSize: '0.8rem', 
+                fontWeight: '600', 
+                padding: '0.2rem 0.6rem', 
+                borderRadius: '999px', 
+                background: 'rgba(239, 68, 68, 0.1)',
+                color: 'var(--danger)',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.2rem'
+              }}
+            >
+              Hapus Filter ✕
+            </button>
+          )}
         </div>
         <select 
-          className="input-field" 
-          style={{ width: '200px' }}
+          style={{ 
+            width: '200px', 
+            padding: '0.5rem', 
+            borderRadius: 'var(--radius-sm)', 
+            border: '1px solid var(--glass-border)',
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            outline: 'none'
+          }}
           value={sortBy}
           onChange={(e) => {
             const val = e.target.value
@@ -190,11 +198,11 @@ function ProductsCatalog() {
         </select>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Sidebar Filter 3D */}
-        <aside className="w-full md:w-[280px] flex-shrink-0">
-          <div className="glass-panel" style={{ padding: '1.5rem', position: 'sticky', top: '100px' }}>
-            <h3 style={{ marginBottom: '1.25rem', fontWeight: 700 }}>Filter Kategori</h3>
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Sidebar Filter */}
+        <aside className="w-full md:w-[260px] flex-shrink-0">
+          <div style={{ padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', position: 'sticky', top: '90px' }}>
+            <h3 style={{ marginBottom: '1.25rem', fontWeight: 700, fontSize: '1.1rem' }}>Filter Kategori</h3>
             <div className="flex flex-row md:flex-col gap-3 mb-8 overflow-x-auto pb-2">
               {(() => {
                 const categoryIcons: Record<string, string> = {
@@ -213,104 +221,93 @@ function ProductsCatalog() {
                     <button
                       key={cat}
                       onClick={() => handleCategoryClick(cat)}
-                      className={`btn-3d flex-shrink-0 ${isActive ? 'btn-primary' : 'btn-secondary'}`}
+                      className="flex-shrink-0"
                       style={{
-                        padding: '0.75rem 1rem',
-                        borderRadius: 'var(--radius-lg)',
-                        fontWeight: isActive ? '800' : '500',
-                        fontSize: '0.9rem',
+                        padding: '0.6rem 1rem',
+                        borderRadius: '999px',
+                        fontWeight: isActive ? '600' : '500',
+                        fontSize: '0.85rem',
                         cursor: 'pointer',
                         textAlign: 'left',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.75rem',
-                        border: '1px solid var(--glass-border)',
-                        background: isActive ? 'linear-gradient(135deg, var(--accent-color), #818cf8)' : 'var(--bg-secondary)',
-                        color: isActive ? 'white' : 'var(--text-primary)',
-                        boxShadow: isActive ? '0 4px 12px rgba(99, 102, 241, 0.3)' : 'var(--shadow-sm)',
+                        border: isActive ? '1px solid var(--accent-color)' : '1px solid var(--glass-border)',
+                        background: isActive ? 'rgba(99, 102, 241, 0.05)' : 'transparent',
+                        color: isActive ? 'var(--accent-color)' : 'var(--text-primary)',
                         transition: 'all 0.2s ease',
-                        textTransform: 'none',
-                        letterSpacing: 'normal'
                       }}
                     >
                       <span style={{ fontSize: '1.1rem' }}>{categoryIcons[cat] || '🏷️'}</span>
                       <span style={{ flex: 1 }}>{cat}</span>
-                      {isActive && <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>✕</span>}
                     </button>
                   );
                 })
               })()}
             </div>
 
-            <h3 style={{ marginBottom: '1rem', fontWeight: 700 }}>Harga</h3>
+            <h3 style={{ marginBottom: '1rem', fontWeight: 700, fontSize: '1.1rem' }}>Harga</h3>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               <input 
                 type="number" 
                 placeholder="Min" 
-                className="input-field" 
-                style={{ padding: '0.5rem', width: '100%' }}
+                style={{ padding: '0.5rem', width: '100%', borderRadius: 'var(--radius-sm)', border: '1px solid var(--glass-border)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
               />
-              <span>-</span>
+              <span style={{ color: 'var(--text-secondary)' }}>-</span>
               <input 
                 type="number" 
                 placeholder="Max" 
-                className="input-field" 
-                style={{ padding: '0.5rem', width: '100%' }}
+                style={{ padding: '0.5rem', width: '100%', borderRadius: 'var(--radius-sm)', border: '1px solid var(--glass-border)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
               />
             </div>
-            <button 
+            <Button 
               onClick={() => {
                 setPriceFilter({
                   min: minPrice ? Number(minPrice) : 0,
                   max: maxPrice ? Number(maxPrice) : Infinity
                 })
               }}
-              className="btn btn-secondary" 
-              style={{ width: '100%', marginTop: '1.5rem' }}
+              variant="secondary" 
+              style={{ width: '100%', marginTop: '1rem', padding: '0.5rem', fontSize: '0.9rem' }}
             >
               Terapkan Filter
-            </button>
+            </Button>
           </div>
         </aside>
 
         {/* Product Grid */}
         <div style={{ flex: 1 }}>
           {loading ? (
-            <div className="glass-panel" style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
               Memuat katalog produk digital...
             </div>
           ) : sortedProducts.length === 0 ? (
-            <div className="glass-panel" style={{ padding: '4rem 2rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-3d)' }}>
-              <div style={{ fontSize: '4.5rem', marginBottom: '1.5rem', filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.15))' }}>🛍️</div>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>Belum Ada Produk</h3>
-              <p style={{ color: 'var(--text-secondary)', maxWidth: '440px', margin: '0 auto 2rem auto', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                {categoryParam || searchParam 
-                  ? 'Tidak ada produk digital yang cocok dengan filter atau kata kunci Anda. Coba reset filter atau gunakan kata kunci lain.'
-                  : 'Saat ini belum ada produk digital yang terdaftar di marketplace. Buka toko dan jadilah penjual pertama di platform kami!'}
+            <div style={{ padding: '4rem 2rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--glass-border)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+              <div style={{ fontSize: '3.5rem', marginBottom: '1rem', opacity: 0.5 }}>🛍️</div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Belum Ada Produk</h3>
+              <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto 1.5rem auto', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                {categoryParam || searchParam || minPrice || maxPrice
+                  ? 'Tidak ada produk digital yang cocok dengan filter atau kata kunci Anda.'
+                  : 'Saat ini belum ada produk digital yang terdaftar di marketplace.'}
               </p>
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                <Link href="/register?role=seller">
-                  <Button variant="primary" className="btn-3d">Buka Toko Sekarang</Button>
-                </Link>
-                {(categoryParam || searchParam || minPrice || maxPrice) && (
-                  <button 
-                    onClick={() => router.push('/products')} 
-                    className="btn btn-secondary btn-3d"
-                    style={{ padding: '0.5rem 1.5rem', borderRadius: 'var(--radius-md)', fontWeight: 'bold' }}
-                  >
-                    Reset Filter
-                  </button>
-                )}
-              </div>
+              {(categoryParam || searchParam || minPrice || maxPrice) && (
+                <Button 
+                  onClick={() => router.push('/products')} 
+                  variant="secondary"
+                  size="sm"
+                >
+                  Reset Filter
+                </Button>
+              )}
             </div>
           ) : (
-            <div className="grid grid-cols-3" style={{ gap: '1.5rem' }}>
+            <div className="grid grid-cols-3" style={{ gap: '1.25rem' }}>
               {sortedProducts.map(p => (
-                <ProductCard key={p.id} product={p} className="card-3d" />
+                <ProductCard key={p.id} product={p} />
               ))}
             </div>
           )}

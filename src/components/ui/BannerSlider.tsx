@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import './BannerSlider.css';
+
 
 interface BannerSliderProps {
   images: { src: string; alt: string; href: string }[];

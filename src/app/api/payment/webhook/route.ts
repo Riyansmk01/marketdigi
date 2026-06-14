@@ -112,6 +112,36 @@ export async function POST(request: Request) {
           console.error('[VIP RESELLER] Integration Error:', vipErr)
         }
         // ==========================================
+      } else if (paymentStatus === 'EXPIRED') {
+        // Handle EXPIRED status
+        const { data: orderResult } = await supabase
+          .from('orders')
+          .select('id, status')
+          .eq('invoice_no', order_id)
+        const orderData = Array.isArray(orderResult) ? orderResult[0] : null
+
+        if (orderData && orderData.status !== 'Berhasil') {
+          // Verify signature as well for security
+          const { data: txResult } = await supabase
+            .from('payment_transactions')
+            .select('*')
+            .eq('order_id', orderData.id)
+          const tx = Array.isArray(txResult) ? txResult[0] : null
+          
+          if (tx && tx.signature === signature && tx.status !== 'paid') {
+            console.log(`Payment EXPIRED for Order ID: ${order_id}. Updating status.`)
+            
+            await supabase
+              .from('payment_transactions')
+              .update({ status: 'expired' })
+              .eq('id', tx.id)
+
+            await supabase
+              .from('orders')
+              .update({ status: 'Kedaluwarsa' })
+              .eq('id', orderData.id)
+          }
+        }
       }
     }
 

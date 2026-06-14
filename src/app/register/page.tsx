@@ -16,6 +16,18 @@ function RegisterForm() {
   const initialRole = searchParams.get('role') === 'seller' ? 'seller' : 'buyer'
   
   const [role, setRole] = useState<'buyer' | 'seller'>(initialRole)
+  const [alreadyLoggedIn, setAlreadyLoggedIn] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
+
+  React.useEffect(() => {
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+      setAlreadyLoggedIn(true)
+      setUserEmail(localStorage.getItem('userEmail') || '')
+      if (initialRole !== 'seller') {
+        router.push('/') // If they are logged in and not trying to be a seller, redirect them away
+      }
+    }
+  }, [router, initialRole])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -51,14 +63,16 @@ function RegisterForm() {
     e.preventDefault()
     setErrorMsg('')
 
-    if (!email || !password || !confirmPassword) {
-      setErrorMsg('Semua data wajib diisi')
-      return
-    }
+    if (!alreadyLoggedIn) {
+      if (!email || !password || !confirmPassword) {
+        setErrorMsg('Semua data wajib diisi')
+        return
+      }
 
-    if (password !== confirmPassword) {
-      setErrorMsg('Konfirmasi kata sandi tidak cocok')
-      return
+      if (password !== confirmPassword) {
+        setErrorMsg('Konfirmasi kata sandi tidak cocok')
+        return
+      }
     }
 
     setIsConnecting(true)
@@ -70,32 +84,66 @@ function RegisterForm() {
         return
       }
 
-      // Direct Seller Registration with WhatsApp auto-validation
       try {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              role: 'seller',
-              storeName,
-              storeSlug,
-              phone
-            }
-          }
-        })
-        if (error) throw error
+        if (alreadyLoggedIn) {
+          // Upgrade existing user to seller
+          const { data: { user } } = await supabase.auth.getUser()
+          if (!user) throw new Error('Sesi tidak valid')
 
-        localStorage.setItem('userEmail', email)
-        localStorage.setItem('isLoggedIn', 'true')
-        localStorage.setItem('userRole', 'seller')
-        localStorage.setItem('storeName', storeName)
-        localStorage.setItem('storeSlug', storeSlug)
-        localStorage.setItem('storePhone', phone)
-        window.dispatchEvent(new Event('storage'))
-        
-        toast.success('🎉 Pendaftaran Seller Berhasil! Toko Anda kini aktif.')
-        router.push('/dashboard?welcome=true')
+          // Update role to seller in users table if needed (assuming user metadata or custom table)
+          await supabase.from('users').update({ role: 'seller' }).eq('id', user.id)
+
+          // Insert into seller_profiles
+          const { data: profile } = await supabase.from('seller_profiles').insert({
+            user_id: user.id,
+            whatsapp_number: phone,
+            whatsapp_verified: true,
+            tier: 0
+          }).select('id').single()
+
+          if (profile) {
+            await supabase.from('stores').insert({
+              seller_id: profile.id,
+              name: storeName,
+              slug: storeSlug
+            })
+          }
+
+          localStorage.setItem('userRole', 'seller')
+          localStorage.setItem('storeName', storeName)
+          localStorage.setItem('storeSlug', storeSlug)
+          localStorage.setItem('storePhone', phone)
+          window.dispatchEvent(new Event('storage'))
+
+          toast.success('🎉 Berhasil Upgrade ke Seller! Toko Anda kini aktif.')
+          router.push('/dashboard?welcome=true')
+        } else {
+          // Direct Seller Registration with WhatsApp auto-validation
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                role: 'seller',
+                storeName,
+                storeSlug,
+                phone
+              }
+            }
+          })
+          if (error) throw error
+
+          localStorage.setItem('userEmail', email)
+          localStorage.setItem('isLoggedIn', 'true')
+          localStorage.setItem('userRole', 'seller')
+          localStorage.setItem('storeName', storeName)
+          localStorage.setItem('storeSlug', storeSlug)
+          localStorage.setItem('storePhone', phone)
+          window.dispatchEvent(new Event('storage'))
+          
+          toast.success('🎉 Pendaftaran Seller Berhasil! Toko Anda kini aktif.')
+          router.push('/dashboard?welcome=true')
+        }
       } catch (err: any) {
         setErrorMsg(err.message || 'Pendaftaran gagal. Silakan periksa kembali email Anda.')
         toast.error('Registrasi Gagal')
@@ -188,32 +236,36 @@ function RegisterForm() {
 
         <form onSubmit={handleRegisterSubmit}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
-            <Input 
-              label="Alamat Email" 
-              type="email" 
-              placeholder="contoh@email.com" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            
-            <Input 
-              label="Kata Sandi" 
-              type="password" 
-              placeholder="Buat kata sandi minimal 6 karakter" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            
-            <Input 
-              label="Konfirmasi Kata Sandi" 
-              type="password" 
-              placeholder="Ketik ulang kata sandi Anda" 
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
+            {!alreadyLoggedIn && (
+              <>
+                <Input 
+                  label="Alamat Email" 
+                  type="email" 
+                  placeholder="contoh@email.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                
+                <Input 
+                  label="Kata Sandi" 
+                  type="password" 
+                  placeholder="Buat kata sandi minimal 6 karakter" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                
+                <Input 
+                  label="Konfirmasi Kata Sandi" 
+                  type="password" 
+                  placeholder="Ketik ulang kata sandi Anda" 
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </>
+            )}
 
             {/* Seller Specific Fields */}
             {role === 'seller' && (
@@ -257,49 +309,56 @@ function RegisterForm() {
           </div>
 
           <Button type="submit" variant="primary" size="lg" style={{ width: '100%' }} className="btn-3d">
-            Daftar Sekarang
+            {alreadyLoggedIn ? 'Selesaikan Buka Toko' : 'Daftar Sekarang'}
           </Button>
 
-          <div style={{ position: 'relative', textAlign: 'center', margin: '1.5rem 0' }}>
-            <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)' }} />
-            <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'var(--bg-secondary)', padding: '0 0.75rem', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ATAU DAFTAR DENGAN</span>
-          </div>
+          {!alreadyLoggedIn && (
+            <>
+              <div style={{ position: 'relative', textAlign: 'center', margin: '1.5rem 0' }}>
+                <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)' }} />
+                <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'var(--bg-secondary)', padding: '0 0.75rem', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ATAU DAFTAR DENGAN</span>
+              </div>
 
-          <button 
-            type="button"
-            onClick={handleGoogleRegister}
-            style={{ 
-              width: '100%', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              gap: '0.75rem', 
-              padding: '0.75rem', 
-              borderRadius: 'var(--radius-md)', 
-              border: '1px solid var(--glass-border)', 
-              background: '#ffffff', 
-              color: '#1f2937',
-              fontWeight: 700, 
-              cursor: 'pointer', 
-              fontSize: '0.95rem',
-              boxShadow: 'var(--shadow-sm)',
-              transition: 'background 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
-            onMouseLeave={(e) => e.currentTarget.style.background = '#ffffff'}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24">
-              <path fill="#ea4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.18-5.12 4.18-3.324 0-6.024-2.7-6.024-6.024s2.7-6.024 6.024-6.024c1.472 0 2.82.533 3.86 1.41l3.078-3.078C18.995 2.84 15.827 1.5 12.24 1.5 6.442 1.5 1.74 6.2 1.74 12s4.702 10.5 10.5 10.5c5.798 0 10.5-4.7 10.5-10.5 0-.665-.084-1.309-.224-1.925H12.24z"/>
-              <path fill="#4285f4" d="M22.516 10.075H12.24v4.325h6.887a7.228 7.228 0 0 1-3.111 4.74l3.175 3.175c4.71-4.325 7.42-10.7 7.42-10.7a11.162 11.162 0 0 0-.226-1.54z"/>
-              <path fill="#fbbc05" d="M5.716 7.467A6.026 6.026 0 0 1 12.24 5.952c1.472 0 2.82.533 3.86 1.41l3.078-3.078A10.457 10.457 0 0 0 12.24 1.5c-4.488 0-8.326 2.808-9.878 6.786l3.354-.819z"/>
-              <path fill="#34a853" d="M2.362 8.286l3.354.819C6.467 7.467 8.243 5.952 12.24 5.952c1.472 0 2.82.533 3.86 1.41l3.078-3.078A10.457 10.457 0 0 0 12.24 1.5c-4.488 0-8.326 2.808-9.878 6.786l3.354-.819z"/>
-            </svg>
-            Daftar dengan Google
-          </button>
+              <button 
+                type="button"
+                onClick={handleGoogleRegister}
+                style={{ 
+                  width: '100%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  gap: '0.75rem', 
+                  padding: '0.75rem', 
+                  borderRadius: 'var(--radius-md)', 
+                  border: '1px solid var(--glass-border)', 
+                  background: '#ffffff', 
+                  color: '#1f2937',
+                  fontWeight: 700, 
+                  cursor: 'pointer', 
+                  fontSize: '0.95rem',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#ffffff'}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path fill="#ea4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.18-5.12 4.18-3.324 0-6.024-2.7-6.024-6.024s2.7-6.024 6.024-6.024c1.472 0 2.82.533 3.86 1.41l3.078-3.078C18.995 2.84 15.827 1.5 12.24 1.5 6.442 1.5 1.74 6.2 1.74 12s4.702 10.5 10.5 10.5c5.798 0 10.5-4.7 10.5-10.5 0-.665-.084-1.309-.224-1.925H12.24z"/>
+                  <path fill="#4285f4" d="M22.516 10.075H12.24v4.325h6.887a7.228 7.228 0 0 1-3.111 4.74l3.175 3.175c4.71-4.325 7.42-10.7 7.42-10.7a11.162 11.162 0 0 0-.226-1.54z"/>
+                  <path fill="#fbbc05" d="M5.716 7.467A6.026 6.026 0 0 1 12.24 5.952c1.472 0 2.82.533 3.86 1.41l3.078-3.078A10.457 10.457 0 0 0 12.24 1.5c-4.488 0-8.326 2.808-9.878 6.786l3.354-.819z"/>
+                  <path fill="#34a853" d="M2.362 8.286l3.354.819C6.467 7.467 8.243 5.952 12.24 5.952c1.472 0 2.82.533 3.86 1.41l3.078-3.078A10.457 10.457 0 0 0 12.24 1.5c-4.488 0-8.326 2.808-9.878 6.786l3.354-.819z"/>
+                </svg>
+                Daftar dengan Google
+              </button>
+            </>
+          )}
         </form>
 
-        <div style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--glass-border)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
-          Sudah punya akun? <Link href="/login" style={{ color: 'var(--accent-color)', fontWeight: 800 }}>Masuk Disini</Link>
+          {!alreadyLoggedIn && (
+            <div style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--glass-border)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
+              Sudah punya akun? <Link href="/login" style={{ color: 'var(--accent-color)', fontWeight: 800 }}>Masuk Disini</Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

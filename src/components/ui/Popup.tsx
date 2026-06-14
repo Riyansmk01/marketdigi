@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from './Button';
-import './Popup.css';
+
 
 export function Popup() {
   const [isVisible, setIsVisible] = useState(false);

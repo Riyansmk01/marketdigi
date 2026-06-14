@@ -1,4 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import '../components/ui/Popup.css';
+@import '../components/ui/Input.css';
+@import '../components/ui/Button.css';
+@import '../components/ui/BannerSlider.css';
+@import '../components/ui/Badge.css';
+@import '../components/product/ProductCard.css';
+@import '../components/layout/Navbar.css';
+@import "tailwindcss";
 
 :root {
   --bg-primary: #f8fafc;

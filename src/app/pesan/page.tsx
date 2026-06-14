@@ -95,34 +95,25 @@ function ChatForm() {
       }
 
       // Handle direct chat redirect from product details page
-      const targetToko = searchParams.get('toko')
-      if (targetToko) {
-        // Find seller's store and user ID
-        const { data: stores } = await supabase
-          .from('stores')
-          .select('*, seller_profiles:seller_id(*)')
-          .or(`name.eq.${targetToko},slug.eq.${targetToko}`)
+      const targetUserId = searchParams.get('targetUserId')
+      const targetNameParam = searchParams.get('targetName')
+      
+      if (targetUserId) {
+        let sellerName = targetNameParam || 'Seller'
 
-        if (stores && stores.length > 0) {
-          const store = stores[0]
-          const sellerUserId = store.seller_profiles?.user_id
-
-          if (sellerUserId && sellerUserId !== user.id) {
-            if (!mappedContactsMap[sellerUserId]) {
-              const sellerName = store.name
-              mappedContactsMap[sellerUserId] = {
-                id: sellerUserId,
-                name: sellerName,
-                avatar: sellerName.substring(0, 2).toUpperCase(),
-                status: 'Online',
-                autoReply: `Halo kak! Terima kasih telah menghubungi ${sellerName}. Ada yang bisa kami bantu?`,
-                messages: []
-              }
-            }
-            if (!activeContactId) {
-              setActiveContactId(sellerUserId)
-            }
+        // Regardless of DB presence (since mock DB joins might fail), always ensure the seller is available to chat
+        if (!mappedContactsMap[targetUserId]) {
+          mappedContactsMap[targetUserId] = {
+            id: targetUserId,
+            name: sellerName,
+            avatar: sellerName.substring(0, 2).toUpperCase(),
+            status: 'Online',
+            autoReply: `Halo kak! Terima kasih telah menghubungi ${sellerName}. Ada yang bisa kami bantu?`,
+            messages: []
           }
+        }
+        if (!activeContactId) {
+          setActiveContactId(targetUserId)
         }
       }
 

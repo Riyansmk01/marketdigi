@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { siteConfig } from '@/config/site';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
-import './Navbar.css';
+
 
 export function Navbar() {
   const router = useRouter();
@@ -178,7 +178,7 @@ export function Navbar() {
       <div className="container navbar-content">
         <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>
           <img 
-            src="/logosementara.png" 
+            src="/marketdigilogo.png" 
             alt={siteConfig.name} 
             className="logo-img"
             onError={(e) => {

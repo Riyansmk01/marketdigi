@@ -14,8 +14,8 @@ export default function Home() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        // Only fetch published products
-        const { data, error } = await supabase.from('products').select('*').eq('is_published', true)
+        // Fetch published products and join stores table for seller details
+        const { data, error } = await supabase.from('products').select('*, stores(name, slug)').eq('is_published', true)
         if (data) {
           // Fetch active reviews to calculate rating details dynamically
           const { data: reviewsData } = await supabase
@@ -43,7 +43,11 @@ export default function Home() {
               price: Number(p.price || 0),
               displayPrice: `Rp ${Number(p.price || 0).toLocaleString('id-ID')}`,
               ratingAvg: stats.count > 0 ? stats.sum / stats.count : 0,
-              reviewCount: stats.count
+              reviewCount: stats.count,
+              seller: {
+                name: p.stores?.name || 'Toko',
+                slug: p.stores?.slug || ''
+              }
             }
           })
           setProducts(mapped)

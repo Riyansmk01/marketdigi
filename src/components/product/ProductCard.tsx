@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Product } from '@/types';
 import { Badge } from '@/components/ui/Badge';
-import './ProductCard.css';
+
 
 interface ProductCardProps {
   product: Product;
@@ -82,9 +82,10 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
   
   return (
     <Link href={`/product/${product.id}`} className={`product-card ${className}`}>
-      {/* Dynamic graphic thumbnail */}
       <div className="card-img-placeholder" style={{ background: theme.gradient }}>
-        {product.thumbnailUrl ? (
+        {(product as any).image_urls && (product as any).image_urls.length > 0 ? (
+          <img src={(product as any).image_urls[0]} alt={product.title} />
+        ) : product.thumbnailUrl ? (
           <img src={product.thumbnailUrl} alt={product.title} />
         ) : (
           theme.icon
@@ -107,14 +108,14 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
         <div className="card-rating-sold">
           <span className="rating-star">⭐ {product.ratingAvg !== undefined && product.ratingAvg > 0 ? product.ratingAvg.toFixed(1) : '0.0'} ({product.reviewCount || 0})</span>
           <span className="divider">•</span>
-          <span className="sold-count">Terjual {getSoldCount(product.id)}</span>
+          <span className="sold-count">Terjual {(product as any).soldCount || 0}</span>
         </div>
         
         <div className="card-price">{product.displayPrice}</div>
         
         {/* Card Metadata info */}
         <div className="card-meta">
-          <span className="seller-name">{product.seller.name}</span>
+          <span className="seller-name">{product.seller?.name || 'Toko'}</span>
           <span className="divider">•</span>
           <span className="fulfillment-type">{product.fulfillmentType}</span>
         </div>

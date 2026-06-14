@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/supabaseClient'
 
 export default function CartPage() {
   const router = useRouter()
@@ -52,48 +53,77 @@ export default function CartPage() {
     
     setIsProcessing(true)
     try {
-      const response = await fetch('/api/orders/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          items: cartItems,
-          subtotal,
-          serviceFee,
-          total,
-          paymentMethod: paymentMethod.toUpperCase()
-        })
-      })
-
-      const result = await response.json()
-      
-      if (!response.ok || !result.status) {
-        if (response.status === 401) {
-          toast.error('Silakan login terlebih dahulu untuk checkout.')
-          router.push('/login')
-        } else {
-          toast.error(result.message || 'Gagal membuat pesanan')
-        }
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) {
+        toast.error('Silakan login terlebih dahulu untuk checkout.')
+        router.push('/login')
         setIsProcessing(false)
         return
       }
 
-      // Save the returned order to localStorage so Riwayat Pesanan and Checkout pages can read it immediately
-      // (This maintains compatibility with the existing checkout UI without refactoring everything)
+      // Generate Invoice Number
+      const dateObj = new Date()
+      const invoiceNo = 'INV-' + dateObj.getFullYear() + (dateObj.getMonth() + 1).toString().padStart(2, '0') + dateObj.getDate().toString().padStart(2, '0') + '-' + Math.floor(1000 + Math.random() * 9000)
+
+      const storeId = cartItems[0]?.store_id || 1
+
+      const orderPayload = {
+        buyer_id: session.user.id,
+        store_id: storeId,
+        invoice_no: invoiceNo,
+        subtotal: Number(subtotal),
+        service_fee: Number(serviceFee),
+        total: Number(total),
+        status: 'Proses'
+      }
+
+      const { data: newOrderResult, error: insertOrderErr } = await supabase
+        .from('orders')
+        .insert(orderPayload)
+        .select('id, invoice_no, total, status, created_at')
+
+      const newOrder = Array.isArray(newOrderResult) ? newOrderResult[0] : null
+
+      if (insertOrderErr || !newOrder) {
+        throw new Error('Gagal menyimpan pesanan ke database.')
+      }
+
+      const orderItemsPayload = cartItems.map((item: any) => ({
+        order_id: newOrder.id,
+        product_id: item.id,
+        qty: Number(item.qty),
+        price: Number(item.price),
+        custom_payload: {
+          variant: item.variant,
+          customFields: item.customFields,
+          note: item.note
+        }
+      }))
+
+      await supabase.from('order_items').insert(orderItemsPayload)
+
+      const responseData = {
+        id: newOrder.id,
+        invoiceNo: newOrder.invoice_no,
+        items: cartItems,
+        subtotal: Number(subtotal),
+        serviceFee: Number(serviceFee),
+        total: Number(total),
+        paymentMethod: paymentMethod.toUpperCase(),
+        status: newOrder.status,
+        createdAt: newOrder.created_at || new Date().toISOString()
+      }
+
       const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
-      const newOrder = result.data
-      localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]))
+      localStorage.setItem('orders', JSON.stringify([responseData, ...existingOrders]))
       
-      // Clear cart
       setCartItems([])
       localStorage.removeItem('cart')
       
-      // Redirect to Checkout page
       router.push(`/checkout/${newOrder.id}`)
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      toast.error('Terjadi kesalahan saat memproses pesanan')
+      toast.error(err.message || 'Terjadi kesalahan saat memproses pesanan')
       setIsProcessing(false)
     }
   }

@@ -9,7 +9,7 @@ export function Footer() {
         <div>
           <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', marginBottom: '1rem', textDecoration: 'none' }}>
             <img 
-              src="/logosementara.png" 
+              src="/marketdigilogo.png" 
               alt={siteConfig.name} 
               className="logo-img"
               style={{ height: '32px' }}
