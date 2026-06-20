@@ -20,6 +20,7 @@ export interface Product {
   seller: Seller;
   slug: string;
   thumbnailUrl?: string;
+  image_urls?: string[];
   ratingAvg?: number;
   reviewCount?: number;
 }
