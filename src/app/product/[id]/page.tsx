@@ -130,7 +130,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     try {
       const { data: productResult, error } = await supabase
         .from('products')
-        .select('*, stores(*, seller_profiles(user_id))')
+        .select('*, stores(id, name, slug, seller_profiles(id, user_id, users:user_id(email)))')
         .eq('id', id)
       const data = Array.isArray(productResult) ? productResult[0] : null
       if (data) {
@@ -599,18 +599,23 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
               Rp {productPrice.toLocaleString('id-ID')}
             </div>
             
-            <div className="seller-info glass-panel card-3d" style={{ display: 'flex', alignItems: 'center', padding: '1.25rem', gap: '1rem', marginTop: '1.5rem', background: 'var(--bg-secondary)' }}>
+              <div className="seller-info glass-panel card-3d" style={{ display: 'flex', alignItems: 'center', padding: '1.25rem', gap: '1rem', marginTop: '1.5rem', background: 'var(--bg-secondary)' }}>
               <div className="avatar" style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent-color), #818cf8)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.5), 0 4px 6px rgba(0,0,0,0.1)' }}>
-                {(product.seller?.name || 'ST').substring(0, 2).toUpperCase()}
+                {(product.stores?.name || 'ST').substring(0, 2).toUpperCase()}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: '800', fontSize: '1.1rem' }}>{product.seller?.name || 'SoftTech Official'} <span style={{ fontSize: '0.9rem' }}>✔️</span></div>
+                <div style={{ fontWeight: '800', fontSize: '1.1rem' }}>{product.stores?.name || 'Toko Digital'} <span style={{ fontSize: '0.9rem' }}>✔️</span></div>
                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>⭐ {sellerStats.ratingAvg > 0 ? sellerStats.ratingAvg : '0.0'} ({sellerStats.reviewCount} Ulasan) • Aktif Baru Saja</div>
               </div>
               <Button onClick={() => {
-                const targetId = product.stores?.seller_profiles?.user_id || '';
-                const targetName = product.stores?.name || 'Seller';
-                router.push(`/pesan?targetUserId=${encodeURIComponent(targetId)}&targetName=${encodeURIComponent(targetName)}`);
+                // seller_profiles.user_id adalah UUID user Supabase Auth dari penjual
+                const sellerUserId = product.stores?.seller_profiles?.user_id || ''
+                const storeName = product.stores?.name || 'Seller'
+                if (!sellerUserId) {
+                  toast.error('Info penjual tidak ditemukan. Silakan coba lagi.')
+                  return
+                }
+                router.push(`/pesan?targetUserId=${encodeURIComponent(sellerUserId)}&targetName=${encodeURIComponent(storeName)}`)
               }} variant="secondary" size="sm" className="btn-3d">Chat</Button>
             </div>
           </div>

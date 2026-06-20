@@ -44,6 +44,12 @@ export default function SellerDashboardPage() {
 
   // Incoming orders needing manual action
   const [incomingOrders, setIncomingOrders] = useState<IncomingOrder[]>([])
+  const [buyerIds, setBuyerIds] = useState<{ [orderId: string]: string }>({})
+
+  // License key input state per order
+  const [licenseInputs, setLicenseInputs] = useState<{ [orderId: string]: string }>({})
+  const [sendingLicense, setSendingLicense] = useState<{ [orderId: string]: boolean }>({})
+  const [showLicenseForm, setShowLicenseForm] = useState<{ [orderId: string]: boolean }>({})
 
   // Modal states
   const [showAddProductModal, setShowAddProductModal] = useState(false)
@@ -207,6 +213,11 @@ export default function SellerDashboardPage() {
                   }
                 })
                 setIncomingOrders(mappedOrders)
+
+                // Track buyer_id per order for chat notification
+                const bIds: { [k: string]: string } = {}
+                dbOrders.forEach((ord: any) => { bIds[ord.id] = ord.buyer_id })
+                setBuyerIds(bIds)
               }
             }
           }
@@ -421,23 +432,69 @@ export default function SellerDashboardPage() {
     }
   }
 
-  const handleFulfillOrder = (orderId: string) => {
-    // Change status
-    setIncomingOrders(prev => prev.map(ord => {
-      if (ord.id === orderId) {
-        return { ...ord, status: 'Terkirim' }
-      }
-      return ord
-    }))
-    
-    // Add to revenue
-    const order = incomingOrders.find(o => o.id === orderId)
-    if (order) {
-      setRevenue(prev => prev + (order.price * order.qty))
-      setTotalSales(prev => prev + order.qty)
+  const handleFulfillOrder = async (orderId: string) => {
+    const licenseKey = licenseInputs[orderId]?.trim()
+    if (!licenseKey) {
+      toast.error('Masukkan kode lisensi terlebih dahulu!')
+      return
     }
 
-    toast.success('🔑 Kode Lisensi berhasil dikirimkan ke email pembeli! Transaksi selesai.')
+    setSendingLicense(prev => ({ ...prev, [orderId]: true }))
+    try {
+      // 1. Update order status to Berhasil + simpan license key
+      const { error: orderErr } = await supabase
+        .from('orders')
+        .update({ status: 'Berhasil', license_key: licenseKey })
+        .eq('id', orderId)
+
+      if (orderErr) {
+        // Jika kolom license_key belum ada, coba hanya update status
+        const { error: orderErr2 } = await supabase
+          .from('orders')
+          .update({ status: 'Berhasil' })
+          .eq('id', orderId)
+        if (orderErr2) throw orderErr2
+      }
+
+      // 2. Kirim notifikasi ke pembeli via chats (sebagai pesan sistem)
+      const buyerId = buyerIds[orderId]
+      const { data: { user } } = await supabase.auth.getUser()
+      if (buyerId && user) {
+        await supabase.from('chats').insert({
+          sender_id: user.id,
+          receiver_id: buyerId,
+          message: `🔑 Kode Lisensi Anda:\n\n${licenseKey}\n\nTerima kasih sudah berbelanja di ${storeName}! Jika ada kendala, silakan hubungi kami.`
+        })
+
+        // Notifikasi
+        await supabase.from('notifications').insert({
+          user_id: buyerId,
+          title: '🔑 Kode Lisensi Telah Dikirim!',
+          message: `Kode lisensi untuk pesanan Anda sudah tersedia. Cek halaman Pesan untuk melihatnya.`,
+          is_read: false
+        })
+      }
+
+      // 3. Update local state
+      setIncomingOrders(prev => prev.map(ord => {
+        if (ord.id === orderId) return { ...ord, status: 'Terkirim' }
+        return ord
+      }))
+
+      const order = incomingOrders.find(o => o.id === orderId)
+      if (order) {
+        setRevenue(prev => prev + (order.price * order.qty))
+        setTotalSales(prev => prev + order.qty)
+      }
+
+      setShowLicenseForm(prev => ({ ...prev, [orderId]: false }))
+      toast.success('🔑 Kode Lisensi berhasil dikirimkan ke pembeli via chat! Transaksi selesai.')
+    } catch (err: any) {
+      console.error(err)
+      toast.error('Gagal mengirim lisensi: ' + (err.message || 'Coba lagi'))
+    } finally {
+      setSendingLicense(prev => ({ ...prev, [orderId]: false }))
+    }
   }
 
   return (
@@ -568,9 +625,55 @@ export default function SellerDashboardPage() {
                     </div>
 
                     {order.status === 'Menunggu Pengiriman' && (
-                      <Button onClick={() => handleFulfillOrder(order.id)} variant="primary" size="sm" className="btn-3d" style={{ width: '100%', fontSize: '0.85rem' }}>
-                        🔑 Kirim Kode Lisensi
-                      </Button>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {!showLicenseForm[order.id] ? (
+                          <Button
+                            onClick={() => setShowLicenseForm(prev => ({ ...prev, [order.id]: true }))}
+                            variant="primary" size="sm" className="btn-3d"
+                            style={{ width: '100%', fontSize: '0.85rem' }}
+                          >
+                            🔑 Kirim Kode Lisensi
+                          </Button>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                              🔑 Masukkan Kode Lisensi / Kredensial Akun:
+                            </label>
+                            <textarea
+                              rows={3}
+                              placeholder="Contoh:\nemail: user@domain.com\npassword: abc123\natau Product Key: XXXXX-XXXXX-XXXXX"
+                              value={licenseInputs[order.id] || ''}
+                              onChange={e => setLicenseInputs(prev => ({ ...prev, [order.id]: e.target.value }))}
+                              style={{
+                                width: '100%', padding: '0.65rem 0.9rem',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1.5px solid var(--accent-color)',
+                                background: 'var(--bg-secondary)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.85rem', resize: 'vertical', outline: 'none',
+                                fontFamily: 'monospace'
+                              }}
+                            />
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <Button
+                                onClick={() => handleFulfillOrder(order.id)}
+                                variant="primary" size="sm" className="btn-3d"
+                                disabled={sendingLicense[order.id] || !licenseInputs[order.id]?.trim()}
+                                style={{ flex: 1, fontSize: '0.82rem' }}
+                              >
+                                {sendingLicense[order.id] ? 'Mengirim...' : '✅ Konfirmasi & Kirim'}
+                              </Button>
+                              <Button
+                                onClick={() => setShowLicenseForm(prev => ({ ...prev, [order.id]: false }))}
+                                variant="secondary" size="sm"
+                                style={{ fontSize: '0.82rem' }}
+                              >
+                                Batal
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 ))}
