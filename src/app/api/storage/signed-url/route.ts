@@ -30,7 +30,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ signedUrl: data.signedUrl, expiresAt: data.signedUrlExpiresAt })
+    // supabase-js createSignedUrl currently returns { signedUrl }
+    // avoid referencing a non-existent property to satisfy TypeScript/Next build
+    return NextResponse.json({ signedUrl: data.signedUrl })
   } catch (err: any) {
     console.error('[signed-url] Unexpected error:', err)
     return NextResponse.json({ error: err.message || 'Unexpected error' }, { status: 500 })
