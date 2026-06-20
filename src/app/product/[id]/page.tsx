@@ -122,8 +122,10 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
   // Review Form States
   const [ratingVal, setRatingVal] = useState(5)
   const [commentText, setCommentText] = useState('')
-  const [mediaFile, setMediaFile] = useState<any>(null)
-  const [mediaBase64, setMediaBase64] = useState('')
+  const [reviewPhotos, setReviewPhotos] = useState<File[]>([])
+  const [reviewVideo, setReviewVideo] = useState<File | null>(null)
+  const [reviewPhotoPreviews, setReviewPhotoPreviews] = useState<string[]>([])
+  const [reviewVideoPreview, setReviewVideoPreview] = useState('')
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
 
   async function loadProductAndReviews() {
@@ -214,16 +216,32 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     loadProductAndReviews()
   }, [id])
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setMediaFile(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setMediaBase64(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (reviewPhotos.length + files.length > 5) {
+      toast.error('Maksimal 5 foto per ulasan')
+      return
     }
+    const newPhotos = [...reviewPhotos, ...files].slice(0, 5)
+    setReviewPhotos(newPhotos)
+    setReviewPhotoPreviews(newPhotos.map(f => URL.createObjectURL(f)))
+  }
+
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error('Video maksimal 20MB')
+      return
+    }
+    setReviewVideo(file)
+    setReviewVideoPreview(URL.createObjectURL(file))
+  }
+
+  const removeReviewPhoto = (idx: number) => {
+    const updated = reviewPhotos.filter((_, i) => i !== idx)
+    setReviewPhotos(updated)
+    setReviewPhotoPreviews(updated.map(f => URL.createObjectURL(f)))
   }
 
   const handleSubmitReview = async (e: React.FormEvent) => {
@@ -236,23 +254,48 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         return
       }
 
-      const { data: reviewResult, error } = await supabase
+      // Upload photos to Supabase storage
+      const uploadedMediaUrls: string[] = []
+
+      for (const photo of reviewPhotos) {
+        const ext = photo.name.split('.').pop()
+        const path = `reviews/${id}/${user.id}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
+        const { error: upErr } = await supabase.storage.from('review_media').upload(path, photo)
+        if (!upErr) {
+          const { data: urlData } = supabase.storage.from('review_media').getPublicUrl(path)
+          if (urlData?.publicUrl) uploadedMediaUrls.push(urlData.publicUrl)
+        }
+      }
+
+      if (reviewVideo) {
+        const ext = reviewVideo.name.split('.').pop()
+        const path = `reviews/${id}/${user.id}_vid_${Date.now()}.${ext}`
+        const { error: vidErr } = await supabase.storage.from('review_media').upload(path, reviewVideo)
+        if (!vidErr) {
+          const { data: urlData } = supabase.storage.from('review_media').getPublicUrl(path)
+          if (urlData?.publicUrl) uploadedMediaUrls.push(urlData.publicUrl)
+        }
+      }
+
+      const { error } = await supabase
         .from('product_reviews')
         .insert({
           product_id: id,
           user_id: user.id,
           rating: ratingVal,
           comment: commentText,
-          media_url: mediaBase64 || null,
+          media_url: uploadedMediaUrls.length > 0 ? uploadedMediaUrls[0] : null,
+          media_urls: uploadedMediaUrls.length > 0 ? uploadedMediaUrls : null,
           is_flagged: false
         })
-        .select('*, users(email)')
 
       if (error) throw error
 
       setCommentText('')
-      setMediaBase64('')
-      setMediaFile(null)
+      setReviewPhotos([])
+      setReviewPhotoPreviews([])
+      setReviewVideo(null)
+      setReviewVideoPreview('')
       toast.success('🎉 Terima kasih! Ulasan Anda berhasil ditambahkan.')
       loadProductAndReviews()
     } catch (err: any) {
@@ -497,34 +540,76 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 {hasPurchased && (
                   <form onSubmit={handleSubmitReview} className="glass-panel" style={{ padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
                     <h4 style={{ fontWeight: '800', marginBottom: '1rem' }}>✍️ Berikan Ulasan Anda</h4>
-                    <div style={{ display: 'flex', gap: '0.5rem', fontSize: '1.5rem', marginBottom: '1rem' }}>
+
+                    {/* Star Rating */}
+                    <div style={{ display: 'flex', gap: '0.5rem', fontSize: '2rem', marginBottom: '1rem' }}>
                       {[1, 2, 3, 4, 5].map(star => (
                         <span 
                           key={star} 
                           onClick={() => setRatingVal(star)}
-                          style={{ cursor: 'pointer', color: star <= ratingVal ? '#f59e0b' : 'var(--text-secondary)' }}
+                          style={{ cursor: 'pointer', color: star <= ratingVal ? '#f59e0b' : 'var(--text-secondary)', transition: 'color 0.15s, transform 0.15s', transform: star <= ratingVal ? 'scale(1.15)' : 'scale(1)', display: 'inline-block' }}
                         >
                           ★
                         </span>
                       ))}
+                      <span style={{ fontSize: '0.9rem', alignSelf: 'center', color: 'var(--text-secondary)', marginLeft: '0.5rem' }}>
+                        {['','Sangat Buruk','Buruk','Cukup','Bagus','Sangat Bagus'][ratingVal]}
+                      </span>
                     </div>
+
+                    {/* Comment */}
                     <textarea 
-                      placeholder="Bagikan pengalaman belanja Anda di sini..." 
+                      placeholder="Bagikan pengalaman belanja Anda secara detail di sini..." 
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
-                      rows={3}
-                      style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', outline: 'none', marginBottom: '1rem', resize: 'none' }}
+                      rows={4}
+                      style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', outline: 'none', marginBottom: '1.25rem', resize: 'vertical', fontFamily: 'inherit', fontSize: '0.95rem' }}
                       required
                     />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                      <div>
-                        <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Lampirkan Foto/Video (Maks 5MB)</label>
-                        <input type="file" accept="image/*,video/*" onChange={handleFileChange} style={{ fontSize: '0.85rem' }} />
-                      </div>
-                      <Button type="submit" variant="primary" disabled={isSubmittingReview} className="btn-3d">
-                        {isSubmittingReview ? 'Mengirim...' : 'Kirim Ulasan'}
-                      </Button>
+
+                    {/* Photo Upload */}
+                    <div style={{ marginBottom: '1rem' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 700, display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                        <span>📷 Lampirkan Foto (Maks 5)</span>
+                        <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>{reviewPhotos.length}/5</span>
+                      </label>
+                      {reviewPhotos.length < 5 && (
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', borderRadius: 'var(--radius-md)', border: '1.5px dashed var(--glass-border)', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'var(--bg-primary)', transition: 'border-color 0.2s' }}>
+                          <span>➕ Pilih Foto</span>
+                          <input type="file" accept="image/*" multiple onChange={handlePhotoChange} style={{ display: 'none' }} />
+                        </label>
+                      )}
+                      {reviewPhotoPreviews.length > 0 && (
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
+                          {reviewPhotoPreviews.map((src, idx) => (
+                            <div key={idx} style={{ position: 'relative', width: '72px', height: '72px', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '2px solid var(--accent-color)' }}>
+                              <img src={src} alt={`preview-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              <button type="button" onClick={() => removeReviewPhoto(idx)} style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(220,38,38,0.85)', color: 'white', border: 'none', width: '20px', height: '20px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '0 0 0 4px' }}>✕</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
+
+                    {/* Video Upload */}
+                    <div style={{ marginBottom: '1.25rem' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem' }}>🎥 Lampirkan Video (Maks 20MB, opsional)</label>
+                      {!reviewVideo ? (
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', borderRadius: 'var(--radius-md)', border: '1.5px dashed var(--glass-border)', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'var(--bg-primary)' }}>
+                          <span>🎬 Pilih Video</span>
+                          <input type="file" accept="video/*" onChange={handleVideoChange} style={{ display: 'none' }} />
+                        </label>
+                      ) : (
+                        <div style={{ position: 'relative' }}>
+                          <video src={reviewVideoPreview} controls style={{ width: '100%', maxHeight: '160px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }} />
+                          <button type="button" onClick={() => { setReviewVideo(null); setReviewVideoPreview('') }} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(220,38,38,0.85)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 8px', cursor: 'pointer', fontSize: '0.8rem' }}>Hapus Video</button>
+                        </div>
+                      )}
+                    </div>
+
+                    <Button type="submit" variant="primary" disabled={isSubmittingReview} className="btn-3d" style={{ width: '100%' }}>
+                      {isSubmittingReview ? '⏳ Mengirim Ulasan...' : '📤 Kirim Ulasan'}
+                    </Button>
                   </form>
                 )}
 
@@ -555,13 +640,18 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                           ) : (
                             <>
                               <p>{rev.comment}</p>
-                              {rev.media_url && (
-                                <div style={{ marginTop: '0.75rem' }}>
-                                  {rev.media_url.startsWith('data:video') ? (
-                                    <video src={rev.media_url} controls style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '4px' }} />
-                                  ) : (
-                                    <img src={rev.media_url} alt="Review attachment" style={{ maxWidth: '150px', maxHeight: '150px', borderRadius: '4px', objectFit: 'cover' }} />
-                                  )}
+                              {/* Show media: support both media_urls array and legacy media_url */}
+                              {(rev.media_urls?.length > 0 || rev.media_url) && (
+                                <div style={{ marginTop: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                  {(rev.media_urls || [rev.media_url]).map((url: string, midx: number) => {
+                                    if (!url) return null
+                                    const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') || url.startsWith('data:video')
+                                    return isVideo ? (
+                                      <video key={midx} src={url} controls style={{ maxWidth: '100%', maxHeight: '220px', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }} />
+                                    ) : (
+                                      <img key={midx} src={url} alt={`ulasan-${midx}`} style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)', cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />
+                                    )
+                                  })}
                                 </div>
                               )}
                             </>

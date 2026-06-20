@@ -58,6 +58,7 @@ export default function SellerDashboardPage() {
   const [newProductStock, setNewProductStock] = useState('50')
   const [newProductFulfillment, setNewProductFulfillment] = useState('Akun Digital')
   const [newProductCategory, setNewProductCategory] = useState('Akun Streaming')
+  const [newProductDescription, setNewProductDescription] = useState('')
   const [productImages, setProductImages] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
 
@@ -382,7 +383,7 @@ export default function SellerDashboardPage() {
         store_id: storeId,
         name: newProductName,                           // DB column: 'name'
         slug: slug,
-        description: `Produk digital: ${newProductName}. Proses instan dan aman.`,
+        description: newProductDescription.trim() || `Produk digital: ${newProductName}. Proses instan dan aman.`,
         price: priceNum,
         stock_qty: Number(newProductStock) || 50,
         stock_status: 'Ready',
@@ -412,6 +413,7 @@ export default function SellerDashboardPage() {
     setNewProductPrice('')
     setNewProductStock('50')
     setNewProductCategory('Akun Streaming')
+    setNewProductDescription('')
     setProductImages([])
   }
 
@@ -721,6 +723,29 @@ export default function SellerDashboardPage() {
                     onChange={(e) => setNewProductStock(e.target.value)}
                     required 
                   />
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Deskripsi Produk</label>
+                    <textarea
+                      rows={4}
+                      placeholder="Jelaskan detail produk Anda: cara aktivasi, masa berlaku, garansi, dll."
+                      value={newProductDescription}
+                      onChange={(e) => setNewProductDescription(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        borderRadius: 'var(--radius-md)',
+                        background: 'var(--bg-primary)',
+                        border: '1px solid var(--glass-border)',
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                        resize: 'vertical',
+                        fontSize: '0.9rem',
+                        lineHeight: '1.5',
+                        fontFamily: 'inherit'
+                      }}
+                    />
+                  </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Kategori Produk</label>
