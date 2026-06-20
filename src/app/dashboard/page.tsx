@@ -418,18 +418,44 @@ export default function SellerDashboardPage() {
   }
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus produk ini dari etalase?')) return
+    if (!confirm('Apakah Anda yakin ingin menonaktifkan produk ini dari etalase?')) return
 
     try {
-      const { error } = await supabase.from('products').delete().eq('id', id)
-      if (error) {
-        toast.error('Gagal menghapus produk: ' + error.message)
+      // Cek dulu apakah produk ini punya riwayat pesanan
+      const { data: orderItems } = await supabase
+        .from('order_items')
+        .select('id')
+        .eq('product_id', id)
+        .limit(1)
+
+      const hasOrders = Array.isArray(orderItems) && orderItems.length > 0
+
+      if (hasOrders) {
+        // Produk sudah ada di riwayat pesanan — SOFT DELETE (nonaktifkan saja)
+        const { error } = await supabase
+          .from('products')
+          .update({ is_published: false })
+          .eq('id', id)
+
+        if (error) {
+          toast.error('Gagal menonaktifkan produk: ' + error.message)
+        } else {
+          toast.success('📦 Produk dinonaktifkan dari etalase (tidak dihapus karena ada riwayat pesanan).')
+          setListings(prev => prev.filter(p => p.id !== id))
+        }
       } else {
-        toast.success('🗑️ Produk berhasil dihapus dari etalase!')
-        setListings(prev => prev.filter(p => p.id !== id))
+        // Tidak ada pesanan — aman untuk hard delete
+        const { error } = await supabase.from('products').delete().eq('id', id)
+        if (error) {
+          toast.error('Gagal menghapus produk: ' + error.message)
+        } else {
+          toast.success('🗑️ Produk berhasil dihapus dari etalase!')
+          setListings(prev => prev.filter(p => p.id !== id))
+        }
       }
     } catch (err) {
       console.error(err)
+
       toast.error('Terjadi kesalahan saat menghapus produk.')
     }
   }
