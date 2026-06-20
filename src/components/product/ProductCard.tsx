@@ -78,15 +78,17 @@ function getSoldCount(id: string) {
 }
 
 export function ProductCard({ product, className = '' }: ProductCardProps) {
-  const theme = getProductTheme(product.title);
+  // Ensure title fallback exists (some rows may use 'name' instead of 'title')
+  const title = (product as any).title || (product as any).name || 'Produk Digital'
+  const theme = getProductTheme(title);
   
   return (
     <Link href={`/product/${product.id}`} className={`product-card ${className}`}>
       <div className="card-img-placeholder" style={{ background: theme.gradient }}>
-        {(product as any).image_urls && (product as any).image_urls.length > 0 ? (
-          <img src={(product as any).image_urls[0]} alt={product.title} />
+          {(product as any).image_urls && (product as any).image_urls.length > 0 ? (
+          <img src={(product as any).image_urls[0]} alt={title} />
         ) : product.thumbnailUrl ? (
-          <img src={product.thumbnailUrl} alt={product.title} />
+          <img src={product.thumbnailUrl} alt={title} />
         ) : (
           theme.icon
         )}
@@ -102,7 +104,7 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
           {!product.badge && <Badge variant="default">Digital</Badge>}
         </div>
         
-        <h3 className="card-title">{product.title}</h3>
+        <h3 className="card-title">{title}</h3>
         
         {/* Product rating and sales volume */}
         <div className="card-rating-sold">

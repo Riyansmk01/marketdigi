@@ -54,6 +54,14 @@ export const metadata: Metadata = {
       }
     ],
   },
+  icons: {
+    icon: '/marketdigilogo.png',
+    shortcut: '/marketdigilogo.png',
+    apple: '/marketdigilogo.png',
+    other: [
+      { rel: 'manifest', url: '/site.webmanifest' }
+    ]
+  },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.name,

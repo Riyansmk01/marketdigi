@@ -1,16 +1,22 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabaseClient'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 export async function POST(request: Request) {
   try {
+    // --- Auth: verify user token from Authorization header ---
     const authHeader = request.headers.get('authorization')
     const token = authHeader ? authHeader.replace('Bearer ', '') : undefined
-    const { data: { user }, error: authErr } = token 
+
+    const { data: { user }, error: authErr } = token
       ? await supabase.auth.getUser(token)
       : await supabase.auth.getUser()
-      
+
     if (authErr || !user) {
-      return NextResponse.json({ status: false, message: 'Harap login terlebih dahulu untuk membuat pesanan.' }, { status: 401 })
+      return NextResponse.json(
+        { status: false, message: 'Harap login terlebih dahulu untuk membuat pesanan.' },
+        { status: 401 }
+      )
     }
 
     const body = await request.json()
@@ -20,54 +26,64 @@ export async function POST(request: Request) {
       return NextResponse.json({ status: false, message: 'Keranjang kosong.' }, { status: 400 })
     }
 
-    // Generate Invoice Number
+    // --- Generate Invoice Number ---
     const dateObj = new Date()
-    const invoiceNo = 'INV-' + dateObj.getFullYear() + (dateObj.getMonth() + 1).toString().padStart(2, '0') + dateObj.getDate().toString().padStart(2, '0') + '-' + Math.floor(1000 + Math.random() * 9000)
+    const invoiceNo =
+      'INV-' +
+      dateObj.getFullYear() +
+      (dateObj.getMonth() + 1).toString().padStart(2, '0') +
+      dateObj.getDate().toString().padStart(2, '0') +
+      '-' +
+      Math.floor(1000 + Math.random() * 9000)
 
-    // Find the store_id from the first product
-    // Note: If cart has multiple stores, they should ideally be split, but for MVP we use the first item's store
+    // --- Find store_id from first product ---
     const firstItem = items[0]
-    const { data: productData, error: productErr } = await supabase
+    const { data: productData } = await supabaseAdmin
       .from('products')
       .select('store_id')
       .eq('id', firstItem.id)
-    const product = Array.isArray(productData) ? productData[0] : null
+      .maybeSingle()
 
-    let storeId = product?.store_id
+    let storeId = productData?.store_id
     if (!storeId) {
-      // Fallback if product not found or no store
-      const { data: fallbackStores } = await supabase.from('stores').select('id').limit(1)
+      const { data: fallbackStores } = await supabaseAdmin
+        .from('stores')
+        .select('id')
+        .limit(1)
       if (fallbackStores && fallbackStores.length > 0) {
         storeId = fallbackStores[0].id
       } else {
-        return NextResponse.json({ status: false, message: 'Toko produk tidak valid.' }, { status: 400 })
+        return NextResponse.json(
+          { status: false, message: 'Toko produk tidak valid.' },
+          { status: 400 }
+        )
       }
     }
 
-    // 1. Insert into orders table
-    const orderPayload = {
-      buyer_id: user.id,
-      store_id: storeId,
-      invoice_no: invoiceNo,
-      subtotal: Number(subtotal),
-      service_fee: Number(serviceFee),
-      total: Number(total),
-      status: 'Proses'
-    }
-
-    const { data: newOrderResult, error: insertOrderErr } = await supabase
+    // --- 1. Insert order ---
+    const { data: newOrder, error: insertOrderErr } = await supabaseAdmin
       .from('orders')
-      .insert(orderPayload)
+      .insert({
+        buyer_id: user.id,
+        store_id: storeId,
+        invoice_no: invoiceNo,
+        subtotal: Number(subtotal),
+        service_fee: Number(serviceFee),
+        total: Number(total),
+        status: 'Proses',
+      })
       .select('id, invoice_no, total, status, created_at')
-
-    const newOrder = Array.isArray(newOrderResult) ? newOrderResult[0] : null
+      .maybeSingle()
 
     if (insertOrderErr || !newOrder) {
-      console.error('Order Insert Error:', insertOrderErr)
-      return NextResponse.json({ status: false, message: 'Gagal menyimpan pesanan ke database.' }, { status: 500 })
+      console.error('[orders/create] Order insert error:', insertOrderErr)
+      return NextResponse.json(
+        { status: false, message: 'Gagal menyimpan pesanan ke database.' },
+        { status: 500 }
+      )
     }
 
-    // 2. Insert into order_items table
+    // --- 2. Insert order items ---
     const orderItemsPayload = items.map((item: any) => ({
       order_id: newOrder.id,
       product_id: item.id,
@@ -76,35 +92,38 @@ export async function POST(request: Request) {
       custom_payload: {
         variant: item.variant,
         customFields: item.customFields,
-        note: item.note
-      }
+        note: item.note,
+      },
     }))
 
-    const { error: insertItemsErr } = await supabase
+    const { error: insertItemsErr } = await supabaseAdmin
       .from('order_items')
       .insert(orderItemsPayload)
 
     if (insertItemsErr) {
-      console.error('Order Items Insert Error:', insertItemsErr)
-      // Even if items fail, we return the order ID, but ideally we'd rollback. For simplicity we proceed.
+      console.error('[orders/create] Order items insert error (non-fatal):', insertItemsErr)
     }
 
-    // Format the response to match the old localStorage schema so checkout page doesn't break
-    const responseData = {
-      id: newOrder.id,
-      invoiceNo: newOrder.invoice_no,
-      items: items,
-      subtotal: Number(subtotal),
-      serviceFee: Number(serviceFee),
-      total: Number(total),
-      paymentMethod: paymentMethod,
-      status: newOrder.status,
-      createdAt: newOrder.created_at
-    }
-
-    return NextResponse.json({ status: true, data: responseData })
+    // --- Format response to match checkout page schema ---
+    return NextResponse.json({
+      status: true,
+      data: {
+        id: newOrder.id,
+        invoiceNo: newOrder.invoice_no,
+        items,
+        subtotal: Number(subtotal),
+        serviceFee: Number(serviceFee),
+        total: Number(total),
+        paymentMethod,
+        status: newOrder.status,
+        createdAt: newOrder.created_at,
+      },
+    })
   } catch (error: any) {
-    console.error('Error creating order API:', error)
-    return NextResponse.json({ status: false, message: error.message || 'Internal server error' }, { status: 500 })
+    console.error('[orders/create] Unhandled error:', error)
+    return NextResponse.json(
+      { status: false, message: error.message || 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

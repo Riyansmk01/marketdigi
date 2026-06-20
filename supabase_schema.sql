@@ -63,6 +63,8 @@ CREATE TABLE public.products (
     category_id UUID REFERENCES public.categories(id) ON DELETE RESTRICT NOT NULL,
     name TEXT NOT NULL,
     slug TEXT NOT NULL,
+    -- Array/JSON of public image URLs stored in Supabase Storage (used by frontend)
+    image_urls JSONB DEFAULT '[]'::jsonb,
     description TEXT,
     price NUMERIC(12, 2) NOT NULL CHECK (price >= 0),
     stock_qty INTEGER DEFAULT 99 NOT NULL CHECK (stock_qty >= 0),

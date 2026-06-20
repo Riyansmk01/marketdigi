@@ -45,8 +45,8 @@ function ProductsCatalog() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        // Fetch published products and join stores table for seller details
-        const { data, error } = await supabase.from('products').select('*, stores(name, slug)').eq('is_published', true)
+        // Fetch published products and join stores + categories table for seller & category details
+        const { data, error } = await supabase.from('products').select('*, stores(name, slug), categories(name)').eq('is_published', true)
         if (data) {
           // Fetch active reviews to calculate rating details dynamically
           const { data: reviewsData } = await supabase
@@ -71,6 +71,7 @@ function ProductsCatalog() {
               ...p,
               // Normalize name field: DB uses 'name', mock uses 'title'
               title: p.name || p.title || 'Produk Digital',
+              // categories join will populate p.categories.name when present
               categoryName: p.categoryName || p.categories?.name || '',
               ratingAvg: stats.count > 0 ? stats.sum / stats.count : 0,
               reviewCount: stats.count,
