@@ -61,57 +61,49 @@ export default function CartPage() {
         return
       }
 
-      // Generate Invoice Number
-      const dateObj = new Date()
-      const invoiceNo = 'INV-' + dateObj.getFullYear() + (dateObj.getMonth() + 1).toString().padStart(2, '0') + dateObj.getDate().toString().padStart(2, '0') + '-' + Math.floor(1000 + Math.random() * 9000)
-
-      const storeId = cartItems[0]?.store_id || 1
-
-      const orderPayload = {
-        buyer_id: session.user.id,
-        store_id: storeId,
-        invoice_no: invoiceNo,
-        subtotal: Number(subtotal),
-        service_fee: Number(serviceFee),
-        total: Number(total),
-        status: 'Proses'
-      }
-
-      const { data: newOrderResult, error: insertOrderErr } = await supabase
-        .from('orders')
-        .insert(orderPayload)
-        .select('id, invoice_no, total, status, created_at')
-
-      const newOrder = Array.isArray(newOrderResult) ? newOrderResult[0] : null
-
-      if (insertOrderErr || !newOrder) {
-        throw new Error('Gagal menyimpan pesanan ke database.')
-      }
-
-      const orderItemsPayload = cartItems.map((item: any) => ({
-        order_id: newOrder.id,
-        product_id: item.id,
+      // Map cartItems to match database structure where id is the product UUID
+      const itemsPayload = cartItems.map((item: any) => ({
+        id: item.productId || item.id,
         qty: Number(item.qty),
         price: Number(item.price),
-        custom_payload: {
-          variant: item.variant,
-          customFields: item.customFields,
-          note: item.note
-        }
+        variant: item.variant,
+        customFields: item.customFields || {},
+        note: item.note || ''
       }))
 
-      await supabase.from('order_items').insert(orderItemsPayload)
+      const response = await fetch('/api/orders/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          items: itemsPayload,
+          subtotal: Number(subtotal),
+          serviceFee: Number(serviceFee),
+          total: Number(total),
+          paymentMethod: paymentMethod.toUpperCase()
+        })
+      })
+
+      const resData = await response.json()
+
+      if (!response.ok || !resData.status || !resData.data) {
+        throw new Error(resData.message || 'Gagal menyimpan pesanan via API.')
+      }
+
+      const newOrder = resData.data
 
       const responseData = {
         id: newOrder.id,
-        invoiceNo: newOrder.invoice_no,
+        invoiceNo: newOrder.invoiceNo,
         items: cartItems,
         subtotal: Number(subtotal),
         serviceFee: Number(serviceFee),
         total: Number(total),
         paymentMethod: paymentMethod.toUpperCase(),
         status: newOrder.status,
-        createdAt: newOrder.created_at || new Date().toISOString()
+        createdAt: newOrder.createdAt || new Date().toISOString()
       }
 
       const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')

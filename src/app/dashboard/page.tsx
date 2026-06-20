@@ -584,98 +584,149 @@ export default function SellerDashboardPage() {
       {/* Add Product Modal */}
       {showAddProductModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }}>
-          <div className="glass-panel" style={{ padding: '2.5rem', width: '500px', background: 'var(--bg-secondary)', maxWidth: '90%' }}>
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1rem' }}>Tambah Produk Baru</h3>
+          <div className="glass-panel" style={{ padding: '2.5rem', width: '850px', background: 'var(--bg-secondary)', maxWidth: '95%', maxHeight: '90vh', overflowY: 'auto', borderRadius: 'var(--radius-lg)' }}>
+            <h3 style={{ fontSize: '1.6rem', fontWeight: 900, marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem' }} className="text-gradient">Tambah Produk Baru</h3>
             
-            <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <Input 
-                label="Nama Produk Digital" 
-                type="text" 
-                placeholder="Contoh: Lisensi Office 2021 Original" 
-                value={newProductName}
-                onChange={(e) => setNewProductName(e.target.value)}
-                required 
-              />
-
-              <Input 
-                label="Harga Jual (Rp)" 
-                type="number" 
-                placeholder="Contoh: 120000" 
-                value={newProductPrice}
-                onChange={(e) => setNewProductPrice(e.target.value)}
-                required 
-              />
-
-              <Input 
-                label="Jumlah Stok" 
-                type="number" 
-                placeholder="Contoh: 100" 
-                value={newProductStock}
-                onChange={(e) => setNewProductStock(e.target.value)}
-                required 
-              />
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Kategori Produk</label>
-                <select 
-                  className="input-field" 
-                  value={newProductCategory}
-                  onChange={(e) => setNewProductCategory(e.target.value)}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', outline: 'none' }}
-                >
-                  <option value="Akun Streaming">Akun Streaming</option>
-                  <option value="Software & OS">Software & OS</option>
-                  <option value="Template Desain">Template Desain</option>
-                  <option value="Top Up Game">Top Up Game</option>
-                  <option value="Voucher Digital">Voucher Digital</option>
-                  <option value="Jasa Freelance">Jasa Freelance</option>
-                  <option value="Layanan AI">Layanan AI</option>
-                  <option value="Web & Hosting">Web & Hosting</option>
-                </select>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Tipe Fulfillment</label>
-                <select 
-                  className="input-field" 
-                  value={newProductFulfillment}
-                  onChange={(e) => setNewProductFulfillment(e.target.value)}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', outline: 'none' }}
-                >
-                  <option value="Akun Digital">Akun Digital (Serah Kredensial)</option>
-                  <option value="Link Akses">Link Akses (Download Lisensi)</option>
-                  <option value="OTP Service">OTP Service (Layanan Verifikasi)</option>
-                  <option value="Pre-Order">Pre-Order (Proses Manual)</option>
-                </select>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Foto Produk (Maks 6)</span>
-                  <span>{productImages.length}/6</span>
-                </label>
-                {productImages.length < 6 && (
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    multiple 
-                    onChange={handleImageChange}
-                    style={{ fontSize: '0.85rem', padding: '0.5rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--glass-border)' }}
+            <form onSubmit={handleAddProduct}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }} className="md:grid-cols-2">
+                
+                {/* Left Column: Form Fields */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <Input 
+                    label="Nama Produk Digital" 
+                    type="text" 
+                    placeholder="Contoh: Lisensi Office 2021 Original" 
+                    value={newProductName}
+                    onChange={(e) => setNewProductName(e.target.value)}
+                    required 
                   />
-                )}
-                {productImages.length > 0 && (
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-                    {productImages.map((file, idx) => (
-                      <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                        <img src={URL.createObjectURL(file)} alt={`preview-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        <button type="button" onClick={() => handleRemoveImage(idx)} style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', borderRadius: '0 0 0 4px', width: '20px', height: '20px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-                      </div>
-                    ))}
+
+                  <Input 
+                    label="Harga Jual (Rp)" 
+                    type="number" 
+                    placeholder="Contoh: 120000" 
+                    value={newProductPrice}
+                    onChange={(e) => setNewProductPrice(e.target.value)}
+                    required 
+                  />
+
+                  <Input 
+                    label="Jumlah Stok" 
+                    type="number" 
+                    placeholder="Contoh: 100" 
+                    value={newProductStock}
+                    onChange={(e) => setNewProductStock(e.target.value)}
+                    required 
+                  />
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Kategori Produk</label>
+                    <select 
+                      className="input-field" 
+                      value={newProductCategory}
+                      onChange={(e) => setNewProductCategory(e.target.value)}
+                      style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', outline: 'none' }}
+                    >
+                      <option value="Akun Streaming">Akun Streaming</option>
+                      <option value="Software & OS">Software & OS</option>
+                      <option value="Template Desain">Template Desain</option>
+                      <option value="Top Up Game">Top Up Game</option>
+                      <option value="Voucher Digital">Voucher Digital</option>
+                      <option value="Jasa Freelance">Jasa Freelance</option>
+                      <option value="Layanan AI">Layanan AI</option>
+                      <option value="Web & Hosting">Web & Hosting</option>
+                    </select>
                   </div>
-                )}
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Tipe Fulfillment</label>
+                    <select 
+                      className="input-field" 
+                      value={newProductFulfillment}
+                      onChange={(e) => setNewProductFulfillment(e.target.value)}
+                      style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', outline: 'none' }}
+                    >
+                      <option value="Akun Digital">Akun Digital (Serah Kredensial)</option>
+                      <option value="Link Akses">Link Akses (Download Lisensi)</option>
+                      <option value="OTP Service">OTP Service (Layanan Verifikasi)</option>
+                      <option value="Pre-Order">Pre-Order (Proses Manual)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Right Column: Photos & Previews */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Foto Produk (Maks 6)</span>
+                      <span>{productImages.length}/6</span>
+                    </label>
+                    {productImages.length < 6 && (
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        multiple 
+                        onChange={handleImageChange}
+                        style={{ fontSize: '0.85rem', padding: '0.5rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--glass-border)', width: '100%' }}
+                      />
+                    )}
+                    {productImages.length > 0 && (
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                        {productImages.map((file, idx) => (
+                          <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                            <img src={URL.createObjectURL(file)} alt={`preview-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <button type="button" onClick={() => handleRemoveImage(idx)} style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', borderRadius: '0 0 0 4px', width: '20px', height: '20px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Live Preview Card Box */}
+                  <div style={{ border: '1px dashed var(--glass-border-hover)', borderRadius: 'var(--radius-md)', padding: '1.25rem', background: 'var(--bg-primary)' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-color)', textTransform: 'uppercase', display: 'block', marginBottom: '0.75rem' }}>Pratinjau Kartu Produk (Live Preview)</span>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                      <div style={{
+                        width: '70px',
+                        height: '70px',
+                        borderRadius: 'var(--radius-md)',
+                        background: 'linear-gradient(135deg, var(--accent-color), #818cf8)',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.75rem',
+                        fontWeight: 'bold',
+                        flexShrink: 0
+                      }}>
+                        {productImages.length > 0 ? (
+                          <img src={URL.createObjectURL(productImages[0])} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
+                        ) : '📦'}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h4 style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-primary)', margin: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                          {newProductName || 'Nama Produk Baru'}
+                        </h4>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent-color)', marginTop: '0.2rem' }}>
+                          Rp {newProductPrice ? Number(newProductPrice).toLocaleString('id-ID') : '0'}
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                          <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.5rem', background: 'rgba(99,102,241,0.1)', color: 'var(--accent-color)', borderRadius: 'var(--radius-full)', fontWeight: 600 }}>
+                            {newProductCategory}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.5rem', background: 'rgba(16,185,129,0.1)', color: 'var(--success)', borderRadius: 'var(--radius-full)', fontWeight: 600 }}>
+                            Stok: {newProductStock || '0'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
 
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+              {/* Bottom Actions */}
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '2.5rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1.25rem' }}>
                 <Button type="button" onClick={() => setShowAddProductModal(false)} variant="secondary" disabled={isUploading}>Batal</Button>
                 <Button type="submit" variant="primary" className="btn-3d" disabled={isUploading}>
                   {isUploading ? 'Menyimpan...' : 'Simpan Produk'}

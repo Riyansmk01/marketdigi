@@ -316,6 +316,38 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         return
       }
 
+      const itemsPayload = [{
+        id: product.id,
+        qty: qty,
+        price: productPrice,
+        variant: selectedVariant,
+        customFields: {},
+        note: note
+      }]
+
+      const response = await fetch('/api/orders/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          items: itemsPayload,
+          subtotal: totalPrice,
+          serviceFee: 2500,
+          total: totalPrice + 2500,
+          paymentMethod: 'QRIS'
+        })
+      })
+
+      const resData = await response.json()
+
+      if (!response.ok || !resData.status || !resData.data) {
+        throw new Error(resData.message || 'Gagal menyimpan pesanan via API.')
+      }
+
+      const newOrder = resData.data
+
       const items = [{
         id: product.id,
         title: productNameDisplay + (selectedVariant ? ` (${selectedVariant})` : ''),
@@ -326,57 +358,16 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         icon: theme.iconText === 'Windows' ? '💻' : theme.iconText === 'Netflix' ? '📺' : theme.iconText === 'Spotify' ? '🎵' : theme.iconText === 'Canva' ? '🎨' : '📦'
       }]
 
-      // Generate Invoice Number
-      const dateObj = new Date()
-      const invoiceNo = 'INV-' + dateObj.getFullYear() + (dateObj.getMonth() + 1).toString().padStart(2, '0') + dateObj.getDate().toString().padStart(2, '0') + '-' + Math.floor(1000 + Math.random() * 9000)
-
-      const storeId = product.store_id || 1
-
-      const orderPayload = {
-        buyer_id: session.user.id,
-        store_id: storeId,
-        invoice_no: invoiceNo,
-        subtotal: totalPrice,
-        service_fee: 2500,
-        total: totalPrice + 2500,
-        status: 'Proses'
-      }
-
-      const { data: newOrderResult, error: insertOrderErr } = await supabase
-        .from('orders')
-        .insert(orderPayload)
-        .select('id, invoice_no, total, status, created_at')
-
-      const newOrder = Array.isArray(newOrderResult) ? newOrderResult[0] : null
-
-      if (insertOrderErr || !newOrder) {
-        throw new Error('Gagal menyimpan pesanan ke database.')
-      }
-
-      const orderItemsPayload = items.map((item: any) => ({
-        order_id: newOrder.id,
-        product_id: item.id,
-        qty: Number(item.qty),
-        price: Number(item.price),
-        custom_payload: {
-          variant: item.variant,
-          customFields: {},
-          note: item.note
-        }
-      }))
-
-      await supabase.from('order_items').insert(orderItemsPayload)
-
       const responseData = {
         id: newOrder.id,
-        invoiceNo: newOrder.invoice_no,
+        invoiceNo: newOrder.invoiceNo,
         items: items,
         subtotal: totalPrice,
         serviceFee: 2500,
         total: totalPrice + 2500,
         paymentMethod: 'QRIS',
         status: newOrder.status,
-        createdAt: newOrder.created_at || new Date().toISOString()
+        createdAt: newOrder.createdAt || new Date().toISOString()
       }
 
       const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
@@ -395,6 +386,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     const cartItem = {
       id: 'p_cart_' + product.id + '_' + selectedVariant,
       productId: product.id,
+      store_id: product.store_id,
       title: productNameDisplay + (selectedVariant ? ` (${selectedVariant})` : ''),
       price: productPrice,
       qty: qty,

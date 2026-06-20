@@ -55,9 +55,9 @@ export const metadata: Metadata = {
     ],
   },
   icons: {
-    icon: '/marketdigilogo.png',
-    shortcut: '/marketdigilogo.png',
-    apple: '/marketdigilogo.png',
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/icon-512.png',
     other: [
       { rel: 'manifest', url: '/site.webmanifest' }
     ]
