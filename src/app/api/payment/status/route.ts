@@ -56,7 +56,7 @@ export async function GET(request: Request) {
     }
 
     // --- 2. Fallback: query KlikQRIS directly ---
-    const url = `https://klikqris.com/api/qrisv2/status/${merchantId}/${order_id}`
+    const url = `https://klikqris.com/api/qris/status/${order_id}`
     const response = await fetch(url, {
       method: 'GET',
       headers: {

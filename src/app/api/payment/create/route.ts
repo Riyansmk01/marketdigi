@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       keterangan: keterangan || 'Pembayaran Produk Digital Marketdigi',
     }
 
-    const response = await fetch('https://klikqris.com/api/qrisv2/create', {
+    const response = await fetch('https://klikqris.com/api/qris/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

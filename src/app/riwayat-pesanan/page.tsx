@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/supabaseClient'
 
 interface OrderItem {
   id: string
@@ -66,6 +67,34 @@ function OrderHistoryForm() {
     localStorage.setItem('orders', JSON.stringify(updated))
   }
 
+  const [completingOrderId, setCompletingOrderId] = useState<string | null>(null)
+
+  const handleCompleteOrder = async (order: Order) => {
+    setCompletingOrderId(order.id)
+    try {
+      // Check payment status from server before allowing completion
+      const res = await fetch(`/api/payment/status?order_id=${order.invoiceNo}`)
+      const data = await res.json()
+
+      const isPaid =
+        data?.status === true &&
+        (data?.data?.status === 'PAID' || data?.data?.status === 'SUCCESS')
+
+      if (!isPaid) {
+        toast.error('❌ Pembayaran belum terkonfirmasi. Harap selesaikan pembayaran QRIS terlebih dahulu.')
+        return
+      }
+
+      // Payment confirmed — mark order as Berhasil
+      handleStatusChange(order.id, 'Berhasil')
+      toast.success('✅ Transaksi berhasil diselesaikan!')
+    } catch (err) {
+      toast.error('Gagal memverifikasi status pembayaran. Coba lagi.')
+    } finally {
+      setCompletingOrderId(null)
+    }
+  }
+
   const openReviewModal = (item: OrderItem) => {
     setSelectedOrderItem(item)
     setReviewComment('')
@@ -73,24 +102,52 @@ function OrderHistoryForm() {
     setShowReviewModal(true)
   }
 
-  const submitReview = () => {
+  const [submittingReview, setSubmittingReview] = useState(false)
+
+  const submitReview = async () => {
     if (!selectedOrderItem) return
+    setSubmittingReview(true)
     
-    // Save review to local storage
-    const existingReviews = JSON.parse(localStorage.getItem('reviews') || '[]')
-    const newReview = {
-      id: 'rev_' + Math.random().toString(36).substr(2, 9),
-      itemTitle: selectedOrderItem.title,
-      variant: selectedOrderItem.variant,
-      rating: reviewRating,
-      comment: reviewComment,
-      createdAt: new Date().toISOString()
+    try {
+      // Save review to localStorage for local display
+      const existingReviews = JSON.parse(localStorage.getItem('reviews') || '[]')
+      const newReview = {
+        id: 'rev_' + Math.random().toString(36).substr(2, 9),
+        itemTitle: selectedOrderItem.title,
+        variant: selectedOrderItem.variant,
+        rating: reviewRating,
+        comment: reviewComment,
+        createdAt: new Date().toISOString()
+      }
+      localStorage.setItem('reviews', JSON.stringify([newReview, ...existingReviews]))
+
+      // Also save to Supabase so it shows on product pages
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user && selectedOrderItem.id) {
+        const { error: reviewErr } = await supabase
+          .from('product_reviews')
+          .insert({
+            product_id: selectedOrderItem.id,
+            user_id: user.id,
+            rating: reviewRating,
+            comment: reviewComment,
+            is_flagged: false,
+          })
+        if (reviewErr) {
+          console.warn('[submitReview] Supabase insert warning (non-fatal):', reviewErr.message)
+        } else {
+          console.log('[submitReview] Review saved to Supabase for product:', selectedOrderItem.id)
+        }
+      }
+
+      setShowReviewModal(false)
+      toast.success('✅ Ulasan Anda berhasil dikirim dan akan muncul di halaman produk!')
+    } catch (err) {
+      console.error('[submitReview] Error:', err)
+      toast.error('Gagal mengirim ulasan. Coba lagi.')
+    } finally {
+      setSubmittingReview(false)
     }
-    
-    localStorage.setItem('reviews', JSON.stringify([newReview, ...existingReviews]))
-    
-    setShowReviewModal(false)
-    toast.success('Ulasan Anda berhasil dikirim! Terima kasih atas feedback Anda.')
   }
 
   const filters = ['Semua', 'Proses', 'Berhasil', 'Tidak Berhasil', 'Garansi Aktif', 'Dikomplain']
@@ -227,7 +284,15 @@ function OrderHistoryForm() {
                   <Button onClick={() => router.push('/pesan?toko=DigiStore')} variant="secondary" size="sm" className="btn-3d">Hubungi Penjual</Button>
                   
                   {order.status === 'Proses' && (
-                    <Button onClick={() => handleStatusChange(order.id, 'Berhasil')} variant="primary" size="sm" className="btn-3d">Selesaikan Transaksi</Button>
+                    <Button
+                      onClick={() => handleCompleteOrder(order)}
+                      variant="primary"
+                      size="sm"
+                      className="btn-3d"
+                      disabled={completingOrderId === order.id}
+                    >
+                      {completingOrderId === order.id ? '⏳ Memverifikasi...' : 'Selesaikan Transaksi'}
+                    </Button>
                   )}
 
                   {order.status === 'Berhasil' && (
@@ -289,8 +354,10 @@ function OrderHistoryForm() {
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-              <Button onClick={() => setShowReviewModal(false)} variant="secondary">Batal</Button>
-              <Button onClick={submitReview} variant="primary" className="btn-3d">Kirim Ulasan</Button>
+              <Button onClick={() => setShowReviewModal(false)} variant="secondary" disabled={submittingReview}>Batal</Button>
+              <Button onClick={submitReview} variant="primary" className="btn-3d" disabled={submittingReview}>
+                {submittingReview ? '⏳ Mengirim...' : 'Kirim Ulasan'}
+              </Button>
             </div>
           </div>
         </div>

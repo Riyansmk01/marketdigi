@@ -39,8 +39,9 @@ function CheckoutDetail({ params }: { params: Promise<{ orderId: string }> }) {
   // QRIS states
   const [qrisUrl, setQrisUrl] = useState('')
   const [totalAmountPaid, setTotalAmountPaid] = useState('')
-  const [timeLeft, setTimeLeft] = useState(300) // 5 minutes
+  const [timeLeft, setTimeLeft] = useState(3600) // default 60 minutes (from API)
   const [paymentStatus, setPaymentStatus] = useState('PENDING') // PENDING, SUCCESS, EXPIRED
+  const [qrisImage, setQrisImage] = useState('') // base64 image fallback
 
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -110,10 +111,20 @@ function CheckoutDetail({ params }: { params: Promise<{ orderId: string }> }) {
       const resData = await response.json()
 
       if (response.ok && resData.status && resData.data) {
-        const qris = resData.data.qris_url
+        const qris = resData.data.qris_url || ''
         const amount = resData.data.total_amount
+        const img = resData.data.qris_image || '' // base64 image
         setQrisUrl(qris)
+        if (img) setQrisImage(img)
         setTotalAmountPaid(amount)
+
+        // Compute timeLeft from expired_at timestamp
+        if (resData.data.expired_at) {
+          const expTs = new Date(resData.data.expired_at).getTime()
+          const nowTs = Date.now()
+          const diff = Math.max(0, Math.floor((expTs - nowTs) / 1000))
+          setTimeLeft(diff)
+        }
         
         // Save back to localStorage
         const localOrders = localStorage.getItem('orders')
@@ -239,7 +250,11 @@ function CheckoutDetail({ params }: { params: Promise<{ orderId: string }> }) {
 
             {/* Live QR Image Box */}
             <div style={{ margin: '2rem auto', background: 'white', padding: '1.5rem', borderRadius: 'var(--radius-md)', display: 'inline-block', boxShadow: 'var(--shadow-md)', border: '1px solid var(--glass-border)' }}>
-              <img src={qrisUrl} alt="Kode QRIS Dinamis Klikqris" style={{ width: '250px', height: '250px', objectFit: 'contain', display: 'block' }} />
+              <img
+                src={qrisImage || qrisUrl}
+                alt="Kode QRIS Dinamis Klikqris"
+                style={{ width: '250px', height: '250px', objectFit: 'contain', display: 'block' }}
+              />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
@@ -281,17 +296,11 @@ function CheckoutDetail({ params }: { params: Promise<{ orderId: string }> }) {
                 </p>
               </div>
 
-              {/* Manual check status buttons */}
+              {/* Manual check status button */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <Button onClick={() => checkPaymentStatus(order?.invoiceNo || '')} variant="primary" style={{ width: '100%' }} className="btn-3d">
                   🔄 Cek Status Pembayaran
                 </Button>
-                <button 
-                  onClick={handlePaymentSuccess} 
-                  style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', textDecoration: 'underline', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'center' }}
-                >
-                  Simulasikan Pembayaran Berhasil (Demo Bypass)
-                </button>
               </div>
             </div>
 

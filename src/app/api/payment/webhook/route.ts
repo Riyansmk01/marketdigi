@@ -6,6 +6,21 @@ import { vipReseller } from '@/lib/vipResellerClient'
  * POST /api/payment/webhook
  *
  * KlikQRIS callback endpoint. This must respond with HTTP 200 to acknowledge receipt.
+ *
+ * Official KlikQRIS webhook payload (flat, no wrapper):
+ * {
+ *   "order_id": "INV-123",
+ *   "status": "PAID",
+ *   "amount": 1000,
+ *   "total_amount": 1215,
+ *   "payment_date": "2026-01-25 21:48:01",
+ *   "created_at": "...",
+ *   "updated_at": "...",
+ *   "keterangan": "...",
+ *   "direct_url": "...",
+ *   "signature": "8n3v9z..."
+ * }
+ *
  * Double-security: incoming `signature` is compared against what was stored at
  * transaction creation time. Any mismatch is rejected silently.
  */
@@ -14,29 +29,29 @@ export async function POST(request: Request) {
     const payload = await request.json()
     console.log('[webhook] Incoming KlikQRIS callback:', JSON.stringify(payload))
 
-    const { status, data } = payload
-
-    // Only process well-formed callbacks
-    if (status !== 'success' || !data) {
-      return NextResponse.json({ status: 'ok', received: true })
-    }
-
+    // KlikQRIS sends a flat payload — extract fields directly
     const {
       order_id,
       status: paymentStatus,
-      amount_paid,
+      total_amount,
       signature,
     }: {
       order_id: string
       status: string
-      amount_paid: number
+      total_amount: number
       signature: string
-    } = data
+    } = payload
+
+    // Guard: must have an order_id and a status
+    if (!order_id || !paymentStatus) {
+      console.warn('[webhook] Missing order_id or status in payload')
+      return NextResponse.json({ status: 'ok', received: true })
+    }
 
     // -----------------------------------------------------------------------
     // PAID flow
     // -----------------------------------------------------------------------
-    if (paymentStatus === 'PAID') {
+    if (paymentStatus === 'PAID' || paymentStatus === 'SUCCESS') {
       // 1. Lookup order by invoice number
       const { data: orderData, error: orderErr } = await supabaseAdmin
         .from('orders')
@@ -63,7 +78,7 @@ export async function POST(request: Request) {
       }
 
       // 3. Double-Security: Signature validation
-      if (tx.signature !== signature) {
+      if (signature && tx.signature !== signature) {
         console.error(
           `[webhook] SECURITY ALERT: Signature mismatch for ${order_id}! ` +
           `Expected: ${tx.signature}, Received: ${signature}`
@@ -79,14 +94,14 @@ export async function POST(request: Request) {
       }
 
       // 5. Atomically mark payment as paid and order as Berhasil
+      const amountPaid = Number(total_amount) || Number(tx.amount_request)
       const { error: txUpdateErr } = await supabaseAdmin
         .from('payment_transactions')
-        .update({ status: 'paid', amount_paid: Number(amount_paid) })
+        .update({ status: 'paid', amount_paid: amountPaid })
         .eq('id', tx.id)
 
       if (txUpdateErr) {
         console.error(`[webhook] Failed to update payment_transactions:`, txUpdateErr.message)
-        // Return 200 — we logged the issue; manual reconciliation can fix it
         return NextResponse.json({ status: 'ok', received: true })
       }
 
@@ -163,7 +178,7 @@ export async function POST(request: Request) {
         .maybeSingle()
 
       // Only expire if signature matches and not already paid
-      if (tx && tx.signature === signature && tx.status !== 'paid') {
+      if (tx && (!signature || tx.signature === signature) && tx.status !== 'paid') {
         await supabaseAdmin
           .from('payment_transactions')
           .update({ status: 'expired' })
