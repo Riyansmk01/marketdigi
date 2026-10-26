@@ -12,7 +12,6 @@ import InstagramFilterSection from "@/components/katsudoto/InstagramFilterSectio
 import WeddingFAQ from "@/components/katsudoto/WeddingFAQ";
 import FamilyHonorRoll from "@/components/katsudoto/FamilyHonorRoll";
 import AudioPlayer from "@/components/AudioPlayer";
-import InteractiveRoseFlower from "@/components/canvas/InteractiveRoseFlower";
 import EventDetails from "@/components/EventDetails";
 import LoveStory from "@/components/LoveStory";
 import GallerySection from "@/components/GallerySection";
@@ -81,72 +80,49 @@ export default function Home() {
       {/* 9. Couple Section with Oval Frames & Florals */}
       <CoupleSectionRenaissance />
 
-      {/* 10. 3D Blooming Rose Feature Spotlight with Roman Rose Colonnade Arch */}
-      <section className="py-20 px-4 sm:px-6 md:px-8 text-center bg-gradient-to-b from-[#FFF5F7] via-white to-[#FFF5F7] border-t border-b border-pink-200/80 relative overflow-hidden">
-        {/* Subtle Toile & Filigree Background Ambience */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15 pointer-events-none"
-          style={{ backgroundImage: "url('/images/bg-floral-frame.png')" }}
-        />
-        <div className="max-w-xl mx-auto relative z-10">
-          <MotionReveal direction="up">
-            <p className="text-xs uppercase tracking-[0.25em] text-pink-700 font-semibold mb-1">
-              Simbol Cinta Abadi
-            </p>
-            <h3 className="text-2xl sm:text-3xl md:text-4xl font-serif text-stone-900 mb-2">
-              Mawar Merah Muda Berdimensi 3D
-            </h3>
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed mb-2 font-light">
-              Melambangkan rasa syukur, kelembutan hati, dan janji suci kami untuk saling menjaga selamanya.
-            </p>
-            <InteractiveRoseFlower />
-            <span className="text-[11px] text-pink-800/80 italic font-serif block mt-2">
-              * Putar bunga mawar 3D untuk mengagumi setiap helai kelopaknya dari segala sudut
-            </span>
-          </MotionReveal>
-        </div>
-      </section>
+      {/* Floral Divider */}
+      <FloralSectionDivider />
 
-      {/* 11. Event Details (Akad & Resepsi with Luxury Ballroom Backdrop) */}
+      {/* 10. Event Details (Akad & Resepsi with Luxury Ballroom Backdrop) */}
       <EventDetails />
 
-      {/* 12. Venue Map & Facilities Embed */}
+      {/* 11. Venue Map & Facilities Embed */}
       <VenueMapEmbed />
 
-      {/* 13. Personal E-Invitation & QR Code Check-in Pass */}
+      {/* 12. Personal E-Invitation & QR Code Check-in Pass */}
       <EInvitationPass guestName={guestName} />
 
-      {/* 14. Dress Code & Guest Guidelines */}
+      {/* 13. Dress Code & Guest Guidelines */}
       <DressCodeSection />
 
       {/* Floral Divider */}
       <FloralSectionDivider />
 
-      {/* 15. Love Story Timeline */}
+      {/* 14. Love Story Timeline */}
       <LoveStory />
 
-      {/* 16. Gallery Section (12 Curated Photos + Category Filter) */}
+      {/* 15. Gallery Section (12 Curated Photos + Category Filter) */}
       <GallerySection />
 
-      {/* 17. Instagram AR Wedding Filter */}
+      {/* 16. Instagram AR Wedding Filter */}
       <InstagramFilterSection />
 
-      {/* 18. Live Stream Section */}
+      {/* 17. Live Stream Section */}
       <LiveStreamSection />
 
-      {/* 19. RSVP & Live Wishes Guestbook with Stats */}
+      {/* 18. RSVP & Live Wishes Guestbook with Stats */}
       <RSVPAndWishes />
 
-      {/* 20. Digital Gift & Shipping Address */}
+      {/* 19. Digital Gift & Shipping Address */}
       <DigitalGift />
 
-      {/* 21. Family Honor Roll (Turut Mengundang with Indonesian Architecture Tapestry) */}
+      {/* 20. Family Honor Roll (Turut Mengundang with Indonesian Architecture Tapestry) */}
       <FamilyHonorRoll />
 
-      {/* 22. Wedding FAQ Section */}
+      {/* 21. Wedding FAQ Section */}
       <WeddingFAQ />
 
-      {/* 23. Elegant Footer */}
+      {/* 22. Elegant Footer */}
       <footer className="py-20 px-4 sm:px-6 text-center bg-[#3B0713] text-pink-100 relative border-t border-pink-500/20 overflow-hidden">
         {/* Subtle Background Filigree Texture in Footer */}
         <div

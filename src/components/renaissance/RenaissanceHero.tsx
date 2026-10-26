@@ -2,12 +2,10 @@
 
 import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import WeddingRingsWrapper from "@/components/canvas/WeddingRingsWrapper";
 import CountdownTimer from "@/components/CountdownTimer";
 import WhitePeacock from "./WhitePeacock";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 import { motion } from "framer-motion";
-import { Move3d } from "lucide-react";
 
 export default function RenaissanceHero() {
   return (
@@ -69,21 +67,12 @@ export default function RenaissanceHero() {
             </h1>
 
             {/* Wedding Date */}
-            <p className="text-xs sm:text-sm font-light text-pink-200/80 tracking-[0.3em] uppercase mb-5 sm:mb-6">
+            <p className="text-xs sm:text-sm font-light text-pink-200/80 tracking-[0.3em] uppercase mb-6 sm:mb-8">
               12 . 12 . 2026
             </p>
 
-            {/* 3D Wedding Floral & Rings in Hero */}
-            <div className="w-full relative flex flex-col items-center mb-4 touch-pan-y">
-              <WeddingRingsWrapper />
-              <div className="flex items-center gap-1.5 text-[10px] text-amber-200/90 bg-black/40 backdrop-blur-sm border border-amber-400/25 px-3 py-0.5 rounded-full shadow-sm mt-1">
-                <Move3d className="w-3 h-3 text-amber-300" />
-                <span>Geser bunga &amp; cincin 3D</span>
-              </div>
-            </div>
-
             {/* Countdown Timer in Hero */}
-            <div className="w-full mb-5 sm:mb-6">
+            <div className="w-full mb-6 sm:mb-8">
               <CountdownTimer targetDate="2026-12-12T09:00:00" />
             </div>
 
