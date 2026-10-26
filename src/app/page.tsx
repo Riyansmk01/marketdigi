@@ -12,10 +12,7 @@ import InstagramFilterSection from "@/components/katsudoto/InstagramFilterSectio
 import WeddingFAQ from "@/components/katsudoto/WeddingFAQ";
 import FamilyHonorRoll from "@/components/katsudoto/FamilyHonorRoll";
 import AudioPlayer from "@/components/AudioPlayer";
-import WeddingRingsWrapper from "@/components/canvas/WeddingRingsWrapper";
 import InteractiveRoseFlower from "@/components/canvas/InteractiveRoseFlower";
-import CountdownTimer from "@/components/CountdownTimer";
-import CoupleSection from "@/components/CoupleSection";
 import EventDetails from "@/components/EventDetails";
 import LoveStory from "@/components/LoveStory";
 import GallerySection from "@/components/GallerySection";
@@ -24,12 +21,11 @@ import DigitalGift from "@/components/DigitalGift";
 import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
 import FallingPetals from "@/components/ui/FallingPetals";
 import MotionReveal from "@/components/ui/MotionReveal";
-import {
-  DimensionalFloralCorner,
-  FlyingDove,
-  FloralSectionDivider,
-} from "@/components/ui/DimensionalBotanicals";
-import { Heart, Move3d } from "lucide-react";
+import RenaissanceHero from "@/components/renaissance/RenaissanceHero";
+import WeFoundLoveSection from "@/components/renaissance/WeFoundLoveSection";
+import CoupleSectionRenaissance from "@/components/renaissance/CoupleSectionRenaissance";
+import { FloralSectionDivider } from "@/components/ui/DimensionalBotanicals";
+import { Heart } from "lucide-react";
 
 export default function Home() {
   const [isCoverOpen, setIsCoverOpen] = useState(true);
@@ -52,7 +48,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen relative overflow-x-hidden pb-20 selection:bg-pink-200 selection:text-pink-900 bg-[#FDF8F9]">
+    <main className="min-h-screen relative overflow-x-hidden pb-20 selection:bg-pink-200 selection:text-pink-900 bg-[#FDF6F8]">
       {/* 1. Top Reading Scroll Progress Bar */}
       <ScrollProgressBar />
 
@@ -75,71 +71,17 @@ export default function Home() {
       {/* 6. Smart WhatsApp Invitation Tool (Admin) */}
       <WhatsAppShareModal />
 
-      {/* 7. Hero Section with 3D Pink Flowers Bouquet & Rings */}
-      <section
-        id="hero"
-        className="relative min-h-[92vh] md:min-h-screen flex flex-col items-center justify-center text-center px-4 pt-16 pb-14 overflow-hidden bg-gradient-to-b from-[#FFF5F7] via-[#FDF8F9] to-[#FDF8F9]"
-      >
-        {/* Dimensional Floral Corners */}
-        <DimensionalFloralCorner position="top-left" />
-        <DimensionalFloralCorner position="top-right" />
+      {/* 7. Renaissance & Vintage Toile Hero (Exact Replica of Image 1, 2, 3) */}
+      <RenaissanceHero />
 
-        {/* Floating Romantic White Doves (Burung Merpati 3D) */}
-        <div className="absolute top-24 left-6 sm:left-14 w-20 h-16 sm:w-28 sm:h-20 z-20">
-          <FlyingDove direction="right" delay={0.2} />
-        </div>
-        <div className="absolute top-32 right-6 sm:right-16 w-16 h-14 sm:w-24 sm:h-18 z-20">
-          <FlyingDove direction="left" delay={1.2} />
-        </div>
+      {/* 8. We Found Love Section (Exact Replica of Image 4) */}
+      <WeFoundLoveSection />
 
-        {/* Soft decorative romantic pink ambient glow */}
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-96 h-96 bg-pink-300/25 rounded-full blur-3xl pointer-events-none" />
+      {/* 9. Couple Section with Oval Frames & Florals (Exact Replica of Image 5) */}
+      <CoupleSectionRenaissance />
 
-        <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
-          <MotionReveal direction="up" delay={0.1} duration={0.9}>
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif text-stone-900 font-normal tracking-tight mb-2">
-              Riyan &amp; Intan
-            </h1>
-          </MotionReveal>
-
-          <MotionReveal direction="up" delay={0.2}>
-            <p className="text-sm md:text-base font-light text-pink-900/80 tracking-widest uppercase mb-3">
-              Sabtu, 12 Desember 2026 &bull; Jakarta
-            </p>
-          </MotionReveal>
-
-          {/* 3D Pink Flowers Bouquet & Rings Canvas */}
-          <MotionReveal direction="zoom" delay={0.3} className="w-full relative flex flex-col items-center my-2">
-            <WeddingRingsWrapper />
-            <div className="flex items-center gap-1.5 text-[11px] text-pink-800 bg-pink-100/90 border border-pink-200/80 px-3.5 py-1 rounded-full shadow-sm mt-1">
-              <Move3d className="w-3.5 h-3.5 text-pink-600" />
-              <span>Sentuh &amp; geser buket bunga 3D untuk interaksi</span>
-            </div>
-          </MotionReveal>
-
-          {/* Countdown Timer */}
-          <MotionReveal direction="up" delay={0.4}>
-            <CountdownTimer targetDate="2026-12-12T09:00:00" />
-          </MotionReveal>
-        </div>
-      </section>
-
-      {/* Floral Divider */}
-      <FloralSectionDivider />
-
-      {/* 8. Couple Section */}
-      <section className="relative">
-        <DimensionalFloralCorner position="bottom-left" className="opacity-80" />
-        <CoupleSection />
-      </section>
-
-      {/* 9. Second 3D Pink Flower Spotlight Feature */}
+      {/* 10. 3D Blooming Rose Feature Spotlight */}
       <section className="py-12 px-4 text-center bg-gradient-to-r from-pink-50/50 via-white to-pink-50/50 border-t border-b border-pink-100 relative overflow-hidden">
-        {/* Floating Dove in Center Accent */}
-        <div className="absolute top-4 right-10 w-20 h-16 pointer-events-none opacity-85">
-          <FlyingDove direction="left" delay={0.8} />
-        </div>
-
         <MotionReveal direction="up" className="max-w-md mx-auto">
           <p className="text-xs uppercase tracking-[0.25em] text-pink-700 font-semibold mb-1">
             Simbol Cinta Abadi
@@ -157,63 +99,54 @@ export default function Home() {
         </MotionReveal>
       </section>
 
-      {/* 10. Event Details (Akad & Resepsi) */}
+      {/* 11. Event Details (Akad & Resepsi) */}
       <EventDetails />
 
-      {/* 11. Venue Map & Facilities Embed */}
+      {/* 12. Venue Map & Facilities Embed */}
       <VenueMapEmbed />
 
-      {/* 12. Personal E-Invitation & QR Code Check-in Pass */}
-      <section className="relative">
-        <div className="absolute top-12 left-4 w-20 h-16 pointer-events-none opacity-70">
-          <FlyingDove direction="right" delay={1.5} />
-        </div>
-        <EInvitationPass guestName={guestName} />
-      </section>
+      {/* 13. Personal E-Invitation & QR Code Check-in Pass */}
+      <EInvitationPass guestName={guestName} />
 
-      {/* 13. Dress Code & Guest Guidelines */}
+      {/* 14. Dress Code & Guest Guidelines */}
       <DressCodeSection />
 
       {/* Floral Divider */}
       <FloralSectionDivider />
 
-      {/* 14. Love Story Timeline */}
+      {/* 15. Love Story Timeline */}
       <LoveStory />
 
-      {/* 15. Gallery Section with 12 Photos & Category Filter */}
+      {/* 16. Gallery Section (12 Curated Photos + Category Filter) */}
       <GallerySection />
 
-      {/* 16. Instagram AR Wedding Filter */}
+      {/* 17. Instagram AR Wedding Filter */}
       <InstagramFilterSection />
 
-      {/* 17. Live Stream Section */}
+      {/* 18. Live Stream Section */}
       <LiveStreamSection />
 
-      {/* 18. RSVP & Live Wishes Guestbook with Stats */}
-      <section className="relative">
-        <DimensionalFloralCorner position="bottom-right" className="opacity-75" />
-        <RSVPAndWishes />
-      </section>
+      {/* 19. RSVP & Live Wishes Guestbook with Stats */}
+      <RSVPAndWishes />
 
-      {/* 19. Digital Gift & Shipping Address */}
+      {/* 20. Digital Gift & Shipping Address */}
       <DigitalGift />
 
-      {/* 20. Family Honor Roll (Turut Mengundang) */}
+      {/* 21. Family Honor Roll (Turut Mengundang) */}
       <FamilyHonorRoll />
 
-      {/* 21. Wedding FAQ Section */}
+      {/* 22. Wedding FAQ Section */}
       <WeddingFAQ />
 
-      {/* 22. Elegant Footer */}
-      <footer className="py-20 px-4 text-center bg-stone-900 text-stone-300 relative border-t border-pink-500/20">
-        <DimensionalFloralCorner position="top-right" className="opacity-40 filter invert" />
+      {/* 23. Elegant Footer */}
+      <footer className="py-20 px-4 text-center bg-[#4A0E17] text-pink-100 relative border-t border-pink-500/20">
         <MotionReveal direction="up" className="max-w-md mx-auto space-y-4">
           <Heart className="w-6 h-6 text-pink-400 fill-pink-400/40 mx-auto animate-pulse" />
-          <h3 className="text-2xl font-serif text-pink-100">Riyan &amp; Intan</h3>
-          <p className="text-xs text-stone-400 leading-relaxed">
+          <h3 className="text-2xl font-serif text-amber-100">Riyan &amp; Intan</h3>
+          <p className="text-xs text-pink-200/80 leading-relaxed">
             Terima kasih atas doa, restu, dan kehadiran hangat Bapak/Ibu/Saudara/i sekalian dalam momen paling membahagiakan bagi kami berdua.
           </p>
-          <div className="pt-6 border-t border-stone-800 text-[11px] text-stone-500">
+          <div className="pt-6 border-t border-pink-900/60 text-[11px] text-pink-300/60">
             The Wedding of Riyan &amp; Intan &copy; 2026
           </div>
         </MotionReveal>
