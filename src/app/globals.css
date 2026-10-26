@@ -5,27 +5,30 @@
   --font-sans: var(--font-jakarta), system-ui, sans-serif;
   --font-cursive: var(--font-vibes), cursive;
 
-  --color-gold-50: #fbf8ef;
-  --color-gold-100: #f6efd5;
-  --color-gold-200: #ecdda9;
-  --color-gold-300: #dfc476;
-  --color-gold-400: #d1a845;
-  --color-gold-500: #be9027;
-  --color-gold-600: #a1731d;
-  --color-gold-700: #7d541a;
-  --color-gold-800: #66431c;
-  --color-gold-900: #57371c;
+  /* Romantic Luxury Pink & Rose Gold Palette */
+  --color-pink-50: #fdf2f4;
+  --color-pink-100: #fce7eb;
+  --color-pink-200: #fad2da;
+  --color-pink-300: #f6adbc;
+  --color-pink-400: #f07f97;
+  --color-pink-500: #e45374;
+  --color-pink-600: #cf345a;
+  --color-pink-700: #ae2446;
+  --color-pink-800: #91213e;
+  --color-pink-900: #7a1f38;
+
+  --color-rose-gold: #b76e79;
+  --color-rose-gold-light: #e8c5c8;
 }
 
-/* Custom wedding aesthetic helper utilities */
 html {
   scroll-behavior: smooth;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: #faf7f2;
-  color: #292524;
+  background-color: #fdf8f9;
+  color: #2e1c22;
 }
 
 .font-serif-title {

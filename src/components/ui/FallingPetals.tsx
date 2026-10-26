@@ -14,11 +14,13 @@ interface Petal {
   color: string;
 }
 
-const petalColors = [
-  "rgba(244, 204, 209, 0.55)", // Soft blush pink
-  "rgba(253, 230, 138, 0.45)", // Warm champagne gold
-  "rgba(254, 215, 226, 0.6)",  // Pale rose
-  "rgba(245, 158, 11, 0.35)",  // Golden sparkle
+const pinkPetalColors = [
+  "rgba(251, 113, 133, 0.65)", // Rose Pink 400
+  "rgba(244, 114, 182, 0.6)",  // Blossom Pink 400
+  "rgba(253, 164, 175, 0.7)",  // Soft Pastel Pink 300
+  "rgba(254, 205, 211, 0.65)", // Sakura Blush Pink 200
+  "rgba(225, 29, 72, 0.45)",   // Deep Crimson Petal
+  "rgba(251, 191, 36, 0.4)",   // Golden Stamen Particle
 ];
 
 export default function FallingPetals() {
@@ -41,17 +43,17 @@ export default function FallingPetals() {
     };
     window.addEventListener("resize", handleResize);
 
-    const petalCount = window.innerWidth < 768 ? 20 : 35;
+    const petalCount = window.innerWidth < 768 ? 25 : 45;
     const petals: Petal[] = Array.from({ length: petalCount }).map(() => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      size: Math.random() * 8 + 6,
-      speedX: (Math.random() - 0.5) * 0.7 + 0.3,
-      speedY: Math.random() * 0.9 + 0.4,
+      size: Math.random() * 9 + 6,
+      speedX: (Math.random() - 0.5) * 0.8 + 0.35,
+      speedY: Math.random() * 1.0 + 0.5,
       rotation: Math.random() * 360,
-      rotationSpeed: (Math.random() - 0.5) * 1.5,
-      opacity: Math.random() * 0.5 + 0.3,
-      color: petalColors[Math.floor(Math.random() * petalColors.length)],
+      rotationSpeed: (Math.random() - 0.5) * 1.8,
+      opacity: Math.random() * 0.55 + 0.35,
+      color: pinkPetalColors[Math.floor(Math.random() * pinkPetalColors.length)],
     }));
 
     const drawPetal = (p: Petal) => {
@@ -59,10 +61,10 @@ export default function FallingPetals() {
       ctx.translate(p.x, p.y);
       ctx.rotate((p.rotation * Math.PI) / 180);
       ctx.beginPath();
-      ctx.ellipse(0, 0, p.size * 0.6, p.size, Math.PI / 4, 0, 2 * Math.PI);
+      ctx.ellipse(0, 0, p.size * 0.65, p.size, Math.PI / 4, 0, 2 * Math.PI);
       ctx.fillStyle = p.color;
-      ctx.shadowColor = "rgba(251, 191, 36, 0.25)";
-      ctx.shadowBlur = 4;
+      ctx.shadowColor = "rgba(244, 63, 94, 0.25)";
+      ctx.shadowBlur = 5;
       ctx.fill();
       ctx.restore();
     };
@@ -72,7 +74,7 @@ export default function FallingPetals() {
 
       petals.forEach((p) => {
         p.y += p.speedY;
-        p.x += Math.sin(p.y * 0.005) * 0.8 + p.speedX;
+        p.x += Math.sin(p.y * 0.006) * 0.9 + p.speedX;
         p.rotation += p.rotationSpeed;
 
         if (p.y > height + 20) {
@@ -99,7 +101,7 @@ export default function FallingPetals() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-30 opacity-70"
+      className="fixed inset-0 pointer-events-none z-30 opacity-75"
       aria-hidden="true"
     />
   );
