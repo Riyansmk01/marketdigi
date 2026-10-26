@@ -2,7 +2,6 @@
 
 import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { RealisticCornerBouquet } from "@/components/ui/RealisticFloralAccent";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 
 export default function WeFoundLoveSection() {
@@ -26,7 +25,7 @@ export default function WeFoundLoveSection() {
       </div>
 
       <div className="max-w-xl mx-auto flex flex-col items-center text-center relative z-10">
-        {/* Prewedding Photo Frame with Cascading Realistic Corner Flowers (Exact Replica of Image 4) */}
+        {/* Prewedding Photo Frame */}
         <MotionReveal direction="zoom" duration={0.9} className="relative mb-8 sm:mb-10 w-full max-w-sm sm:max-w-md">
           {/* Main Photo Card */}
           <div className="relative rounded-[32px] overflow-hidden border-2 border-amber-300/40 shadow-2xl shadow-black/80 bg-stone-900 aspect-[3/4] flex items-center justify-center">
@@ -40,12 +39,9 @@ export default function WeFoundLoveSection() {
             {/* Subtle vintage vignette shading */}
             <div className="absolute inset-0 bg-gradient-to-t from-stone-950/50 via-transparent to-stone-950/20 pointer-events-none" />
           </div>
-
-          {/* Cascading Realistic Floral Bouquet on Top Right Corner (Exact Replica of Image 4) */}
-          <RealisticCornerBouquet position="top-right" scale={1.05} />
         </MotionReveal>
 
-        {/* Section Headline (Exact Replica of Image 4) */}
+        {/* Section Headline */}
         <MotionReveal direction="up" delay={0.2}>
           <div className="inline-flex items-center gap-2 mb-3">
             <span className="w-6 h-[1px] bg-amber-400" />
@@ -59,7 +55,7 @@ export default function WeFoundLoveSection() {
           </h2>
         </MotionReveal>
 
-        {/* Indonesian Wedding Quote (Exact Replica of Image 4) */}
+        {/* Indonesian Wedding Quote */}
         <MotionReveal direction="up" delay={0.3}>
           <p className="font-serif italic text-pink-100/90 text-sm sm:text-base md:text-lg max-w-md mx-auto leading-relaxed px-4">
             &ldquo;Sesungguhnya tidak ada laki-laki dan perempuan yang sempurna, tetapi kesempurnaan diciptakan apabila keduanya saling melengkapi kekurangan.&rdquo;
