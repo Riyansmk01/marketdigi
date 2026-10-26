@@ -24,7 +24,12 @@ import DigitalGift from "@/components/DigitalGift";
 import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
 import FallingPetals from "@/components/ui/FallingPetals";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { Heart, Move3d, Sparkles } from "lucide-react";
+import {
+  DimensionalFloralCorner,
+  FlyingDove,
+  FloralSectionDivider,
+} from "@/components/ui/DimensionalBotanicals";
+import { Heart, Move3d } from "lucide-react";
 
 export default function Home() {
   const [isCoverOpen, setIsCoverOpen] = useState(true);
@@ -75,6 +80,18 @@ export default function Home() {
         id="hero"
         className="relative min-h-[92vh] md:min-h-screen flex flex-col items-center justify-center text-center px-4 pt-16 pb-14 overflow-hidden bg-gradient-to-b from-[#FFF5F7] via-[#FDF8F9] to-[#FDF8F9]"
       >
+        {/* Dimensional Floral Corners */}
+        <DimensionalFloralCorner position="top-left" />
+        <DimensionalFloralCorner position="top-right" />
+
+        {/* Floating Romantic White Doves (Burung Merpati 3D) */}
+        <div className="absolute top-24 left-6 sm:left-14 w-20 h-16 sm:w-28 sm:h-20 z-20">
+          <FlyingDove direction="right" delay={0.2} />
+        </div>
+        <div className="absolute top-32 right-6 sm:right-16 w-16 h-14 sm:w-24 sm:h-18 z-20">
+          <FlyingDove direction="left" delay={1.2} />
+        </div>
+
         {/* Soft decorative romantic pink ambient glow */}
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-96 h-96 bg-pink-300/25 rounded-full blur-3xl pointer-events-none" />
 
@@ -107,11 +124,22 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Floral Divider */}
+      <FloralSectionDivider />
+
       {/* 8. Couple Section */}
-      <CoupleSection />
+      <section className="relative">
+        <DimensionalFloralCorner position="bottom-left" className="opacity-80" />
+        <CoupleSection />
+      </section>
 
       {/* 9. Second 3D Pink Flower Spotlight Feature */}
-      <section className="py-10 px-4 text-center bg-gradient-to-r from-pink-50/50 via-white to-pink-50/50 border-t border-b border-pink-100">
+      <section className="py-12 px-4 text-center bg-gradient-to-r from-pink-50/50 via-white to-pink-50/50 border-t border-b border-pink-100 relative overflow-hidden">
+        {/* Floating Dove in Center Accent */}
+        <div className="absolute top-4 right-10 w-20 h-16 pointer-events-none opacity-85">
+          <FlyingDove direction="left" delay={0.8} />
+        </div>
+
         <MotionReveal direction="up" className="max-w-md mx-auto">
           <p className="text-xs uppercase tracking-[0.25em] text-pink-700 font-semibold mb-1">
             Simbol Cinta Abadi
@@ -136,15 +164,23 @@ export default function Home() {
       <VenueMapEmbed />
 
       {/* 12. Personal E-Invitation & QR Code Check-in Pass */}
-      <EInvitationPass guestName={guestName} />
+      <section className="relative">
+        <div className="absolute top-12 left-4 w-20 h-16 pointer-events-none opacity-70">
+          <FlyingDove direction="right" delay={1.5} />
+        </div>
+        <EInvitationPass guestName={guestName} />
+      </section>
 
       {/* 13. Dress Code & Guest Guidelines */}
       <DressCodeSection />
 
+      {/* Floral Divider */}
+      <FloralSectionDivider />
+
       {/* 14. Love Story Timeline */}
       <LoveStory />
 
-      {/* 15. Gallery Section with Interactive Lightbox */}
+      {/* 15. Gallery Section with 12 Photos & Category Filter */}
       <GallerySection />
 
       {/* 16. Instagram AR Wedding Filter */}
@@ -154,7 +190,10 @@ export default function Home() {
       <LiveStreamSection />
 
       {/* 18. RSVP & Live Wishes Guestbook with Stats */}
-      <RSVPAndWishes />
+      <section className="relative">
+        <DimensionalFloralCorner position="bottom-right" className="opacity-75" />
+        <RSVPAndWishes />
+      </section>
 
       {/* 19. Digital Gift & Shipping Address */}
       <DigitalGift />
@@ -167,6 +206,7 @@ export default function Home() {
 
       {/* 22. Elegant Footer */}
       <footer className="py-20 px-4 text-center bg-stone-900 text-stone-300 relative border-t border-pink-500/20">
+        <DimensionalFloralCorner position="top-right" className="opacity-40 filter invert" />
         <MotionReveal direction="up" className="max-w-md mx-auto space-y-4">
           <Heart className="w-6 h-6 text-pink-400 fill-pink-400/40 mx-auto animate-pulse" />
           <h3 className="text-2xl font-serif text-pink-100">Riyan &amp; Intan</h3>
