@@ -7,6 +7,10 @@ import EInvitationPass from "@/components/katsudoto/EInvitationPass";
 import DressCodeSection from "@/components/katsudoto/DressCodeSection";
 import LiveStreamSection from "@/components/katsudoto/LiveStreamSection";
 import WhatsAppShareModal from "@/components/katsudoto/WhatsAppShareModal";
+import VenueMapEmbed from "@/components/katsudoto/VenueMapEmbed";
+import InstagramFilterSection from "@/components/katsudoto/InstagramFilterSection";
+import WeddingFAQ from "@/components/katsudoto/WeddingFAQ";
+import FamilyHonorRoll from "@/components/katsudoto/FamilyHonorRoll";
 import AudioPlayer from "@/components/AudioPlayer";
 import WeddingRingsWrapper from "@/components/canvas/WeddingRingsWrapper";
 import CountdownTimer from "@/components/CountdownTimer";
@@ -46,7 +50,7 @@ export default function Home() {
       {/* 1. Top Reading Scroll Progress Bar */}
       <ScrollProgressBar />
 
-      {/* 2. Floating Romantic Rose Petals & Golden Bokeh Overlay */}
+      {/* 2. Floating Romantic Rose Petals & Golden Bokeh Canvas */}
       <FallingPetals />
 
       {/* 3. Signature Katsudoto Wax Seal & Envelope Cover */}
@@ -56,13 +60,13 @@ export default function Home() {
         guestName={guestName}
       />
 
-      {/* 4. Vinyl Music Player (Top Right) */}
+      {/* 4. Vinyl Music Player (Sal Priadi - Kita Usahakan Rumah Itu) */}
       <AudioPlayer autoPlayTrigger={startMusic} />
 
       {/* 5. Floating Mobile Bottom Dock Navigation */}
       <FloatingNavigation />
 
-      {/* 6. Smart WhatsApp Invitation Tool */}
+      {/* 6. Smart WhatsApp Invitation Tool (Admin) */}
       <WhatsAppShareModal />
 
       {/* 7. Hero Section with 3D Rings & Countdown */}
@@ -108,28 +112,40 @@ export default function Home() {
       {/* 9. Event Details (Akad & Resepsi) */}
       <EventDetails />
 
-      {/* 10. Personal E-Invitation & QR Code Check-in Pass */}
+      {/* 10. Venue Map & Facilities Embed */}
+      <VenueMapEmbed />
+
+      {/* 11. Personal E-Invitation & QR Code Check-in Pass */}
       <EInvitationPass guestName={guestName} />
 
-      {/* 11. Dress Code & Guest Guidelines */}
+      {/* 12. Dress Code & Guest Guidelines */}
       <DressCodeSection />
 
-      {/* 12. Love Story */}
+      {/* 13. Love Story Timeline */}
       <LoveStory />
 
-      {/* 13. Gallery Section with Interactive Lightbox */}
+      {/* 14. Gallery Section with Interactive Lightbox */}
       <GallerySection />
 
-      {/* 14. Live Stream Section */}
+      {/* 15. Instagram AR Wedding Filter */}
+      <InstagramFilterSection />
+
+      {/* 16. Live Stream Section */}
       <LiveStreamSection />
 
-      {/* 15. RSVP & Wishes */}
+      {/* 17. RSVP & Live Wishes Guestbook with Stats */}
       <RSVPAndWishes />
 
-      {/* 16. Digital Gift & Shipping Address */}
+      {/* 18. Digital Gift & Shipping Address */}
       <DigitalGift />
 
-      {/* 17. Katsudoto Style Footer */}
+      {/* 19. Family Honor Roll (Turut Mengundang) */}
+      <FamilyHonorRoll />
+
+      {/* 20. Wedding FAQ Section */}
+      <WeddingFAQ />
+
+      {/* 21. Elegant Footer */}
       <footer className="py-20 px-4 text-center bg-stone-900 text-stone-300 relative border-t border-amber-500/20">
         <MotionReveal direction="up" className="max-w-md mx-auto space-y-4">
           <Heart className="w-6 h-6 text-amber-400 fill-amber-400/40 mx-auto animate-pulse" />

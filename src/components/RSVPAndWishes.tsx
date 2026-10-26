@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { Send, CheckCircle2, XCircle, HelpCircle, MessageSquareHeart } from "lucide-react";
+import { Send, CheckCircle2, XCircle, HelpCircle, MessageSquareHeart, Users, ThumbsUp } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { RSVPRecord, WishRecord } from "@/types/wedding";
 import confetti from "canvas-confetti";
@@ -29,10 +29,18 @@ const initialSampleWishes: WishRecord[] = [
     message: "Selamat ya Intan cantik! Maaf belum bisa hadir langsung karena masih dinas di luar kota. Doa terbaik untuk kalian berdua!",
     created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
   },
+  {
+    id: "4",
+    name: "Dimas & Sarah",
+    attendance: "hadir",
+    message: "Masya Allah akhirnya sah juga sahabatku! Semoga berkah dan bahagia selalu menaungi rumah tangga kalian.",
+    created_at: new Date(Date.now() - 3600000 * 18).toISOString(),
+  },
 ];
 
 export default function RSVPAndWishes() {
   const [wishes, setWishes] = useState<WishRecord[]>(initialSampleWishes);
+  const [filter, setFilter] = useState<"all" | "hadir" | "tidak_hadir">("all");
   const [formData, setFormData] = useState({
     name: "",
     attendance: "hadir" as "hadir" | "tidak_hadir" | "ragu",
@@ -74,6 +82,16 @@ export default function RSVPAndWishes() {
     loadWishes();
   }, []);
 
+  const totalHadir = wishes.filter((w) => w.attendance === "hadir").length;
+  const totalAbsen = wishes.filter((w) => w.attendance === "tidak_hadir").length;
+  const totalRagu = wishes.filter((w) => w.attendance === "ragu").length;
+
+  const filteredWishes = wishes.filter((w) => {
+    if (filter === "hadir") return w.attendance === "hadir";
+    if (filter === "tidak_hadir") return w.attendance === "tidak_hadir";
+    return true;
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
@@ -104,7 +122,6 @@ export default function RSVPAndWishes() {
           setWishes((prev) => [data[0] as WishRecord, ...prev]);
         }
       } else {
-        // Fallback local mock state
         const mockCreated: WishRecord = {
           id: String(Date.now()),
           name: newEntry.name,
@@ -117,7 +134,6 @@ export default function RSVPAndWishes() {
         localStorage.setItem("wedding_wishes_backup", JSON.stringify(updated));
       }
 
-      // Trigger Celebration Confetti!
       confetti({
         particleCount: 100,
         spread: 80,
@@ -145,7 +161,7 @@ export default function RSVPAndWishes() {
   return (
     <section id="rsvp" className="py-24 px-4 md:px-8 bg-stone-100/60 relative">
       <div className="max-w-4xl mx-auto">
-        <MotionReveal direction="up" className="text-center mb-14">
+        <MotionReveal direction="up" className="text-center mb-10">
           <p className="text-amber-700 uppercase tracking-[0.3em] text-xs font-semibold mb-2">
             Konfirmasi Kehadiran &amp; Doa
           </p>
@@ -157,9 +173,39 @@ export default function RSVPAndWishes() {
           </p>
         </MotionReveal>
 
+        {/* Live Attendance Stats Counter */}
+        <MotionReveal direction="up" delay={0.1} className="mb-10">
+          <div className="grid grid-cols-3 gap-3 max-w-lg mx-auto text-center">
+            <div className="bg-white p-3.5 rounded-2xl border border-emerald-200/80 shadow-sm">
+              <span className="text-2xl font-serif font-bold text-emerald-700 tabular-nums">
+                {totalHadir}
+              </span>
+              <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold mt-0.5">
+                Pasti Hadir
+              </p>
+            </div>
+            <div className="bg-white p-3.5 rounded-2xl border border-amber-200/80 shadow-sm">
+              <span className="text-2xl font-serif font-bold text-amber-700 tabular-nums">
+                {totalRagu}
+              </span>
+              <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold mt-0.5">
+                Masih Ragu
+              </p>
+            </div>
+            <div className="bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm">
+              <span className="text-2xl font-serif font-bold text-stone-600 tabular-nums">
+                {totalAbsen}
+              </span>
+              <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold mt-0.5">
+                Berhalangan
+              </p>
+            </div>
+          </div>
+        </MotionReveal>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* RSVP Form */}
-          <MotionReveal direction="right" delay={0.1}>
+          <MotionReveal direction="right" delay={0.15}>
             <div className="bg-white rounded-3xl p-6 md:p-8 border border-amber-200/80 shadow-lg shadow-stone-900/5">
               <h3 className="text-xl font-serif text-stone-900 font-semibold mb-6 flex items-center gap-2">
                 <MessageSquareHeart className="w-5 h-5 text-amber-600" />
@@ -275,25 +321,46 @@ export default function RSVPAndWishes() {
             </div>
           </MotionReveal>
 
-          {/* Guestbook Wishes Stream */}
+          {/* Guestbook Wishes Stream with Tabs */}
           <MotionReveal direction="left" delay={0.2}>
             <div className="bg-white rounded-3xl p-6 md:p-8 border border-amber-200/80 shadow-lg shadow-stone-900/5 flex flex-col h-[520px]">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-stone-100">
+              <div className="flex items-center justify-between mb-3 pb-3 border-b border-stone-100">
                 <h3 className="text-xl font-serif text-stone-900 font-semibold">
                   Buku Tamu &amp; Doa
                 </h3>
                 <span className="text-xs px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-medium">
-                  {wishes.length} Ucapan
+                  {wishes.length} Doa Masuk
                 </span>
               </div>
 
-              <div className="overflow-y-auto space-y-4 pr-1 flex-1">
-                {wishes.length === 0 ? (
-                  <div className="text-center py-16 text-stone-400 text-sm">
-                    Belum ada ucapan. Jadilah yang pertama memberikan doa restu!
+              {/* Filter Tabs */}
+              <div className="flex items-center gap-2 mb-4">
+                {[
+                  { key: "all", label: "Semua" },
+                  { key: "hadir", label: "Hadir" },
+                  { key: "tidak_hadir", label: "Absen" },
+                ].map((t) => (
+                  <button
+                    key={t.key}
+                    onClick={() => setFilter(t.key as "all" | "hadir" | "tidak_hadir")}
+                    className={`px-3 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                      filter === t.key
+                        ? "bg-amber-600 text-white"
+                        : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="overflow-y-auto space-y-3.5 pr-1 flex-1">
+                {filteredWishes.length === 0 ? (
+                  <div className="text-center py-16 text-stone-400 text-xs">
+                    Tidak ada ucapan pada kategori ini.
                   </div>
                 ) : (
-                  wishes.map((item) => (
+                  filteredWishes.map((item) => (
                     <div
                       key={item.id}
                       className="p-4 rounded-2xl bg-[#FAF7F2] border border-amber-100/90 text-left transition-all hover:bg-amber-50/60"
