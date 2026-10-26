@@ -46,14 +46,19 @@ export default function RenaissanceHero() {
             {/* Subtle Inner Gold Foil Border */}
             <div className="absolute inset-2.5 rounded-[32px] border border-amber-200/20 pointer-events-none" />
 
-            {/* Interlocking Monogram (Exact Replica of 'MU' in Image 3 -> 'RI') */}
+            {/* Calligraphy Monogram (r & i) */}
             <div className="relative mb-5 select-none flex items-center justify-center">
-              <span className="font-serif text-5xl sm:text-7xl font-light text-transparent bg-clip-text bg-gradient-to-b from-[#FDE047] via-[#E6CA65] to-[#B45309] tracking-tighter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">
-                R
-              </span>
-              <span className="font-serif text-5xl sm:text-7xl font-light text-transparent bg-clip-text bg-gradient-to-b from-[#FDE047] via-[#E6CA65] to-[#B45309] -ml-3 sm:-ml-4 tracking-tighter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">
-                I
-              </span>
+              <div className="relative flex items-center justify-center gap-1">
+                <span className="font-cursive text-7xl sm:text-8xl md:text-9xl text-transparent bg-clip-text bg-gradient-to-b from-[#FFFBEB] via-[#FDE68A] to-[#D97706] tracking-normal drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] leading-none">
+                  r
+                </span>
+                <span className="font-serif italic text-2xl sm:text-3xl text-amber-300/90 mx-1 -mt-3 drop-shadow">
+                  &amp;
+                </span>
+                <span className="font-cursive text-7xl sm:text-8xl md:text-9xl text-transparent bg-clip-text bg-gradient-to-b from-[#FFFBEB] via-[#FDE68A] to-[#D97706] tracking-normal drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] leading-none">
+                  i
+                </span>
+              </div>
             </div>
 
             {/* Section Tag */}

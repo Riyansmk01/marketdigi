@@ -140,36 +140,50 @@ export default function WaxSealEnvelopeCover({
               <div className="flex flex-col items-center">
                 <button
                   onClick={handleOpenClick}
-                  className="group relative flex items-center justify-center focus:outline-none"
+                  className="group relative flex items-center justify-center focus:outline-none mb-3"
                   aria-label="Buka Undangan"
                 >
                   {/* Animated ripple rings */}
-                  <span className="absolute -inset-2.5 rounded-full bg-pink-500/25 animate-ping group-hover:bg-pink-500/40" />
-                  <span className="absolute -inset-1 rounded-full bg-pink-400/25 animate-pulse" />
+                  <span className="absolute -inset-3 rounded-full bg-pink-500/25 animate-ping group-hover:bg-pink-500/40" />
+                  <span className="absolute -inset-1.5 rounded-full bg-amber-400/30 animate-pulse" />
 
-                  {/* Romantic Pink Wax Seal Stamp */}
+                  {/* Romantic Burgundy & Gold Wax Seal Stamp */}
                   <motion.div
                     whileHover={{ scale: 1.08, rotate: 3 }}
                     whileTap={{ scale: 0.94 }}
-                    className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#BE185D] via-[#E11D48] to-[#881337] text-pink-100 shadow-xl shadow-pink-900/40 border-2 border-pink-200/60 flex flex-col items-center justify-center cursor-pointer"
+                    className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#BE185D] via-[#881337] to-[#4A0E17] text-amber-100 shadow-2xl shadow-pink-950/60 border-2 border-amber-300/80 flex flex-col items-center justify-center cursor-pointer p-1"
                   >
-                    <span className="text-[10px] sm:text-[11px] font-serif font-bold tracking-tight text-pink-100 leading-none">
-                      R &amp; I
-                    </span>
-                    <Heart className="w-3 h-3 text-pink-200 fill-pink-200 mt-0.5 animate-pulse" />
+                    {/* Inner gold embossed ring */}
+                    <div className="w-full h-full rounded-full border border-dashed border-amber-300/40 flex flex-col items-center justify-center bg-black/10">
+                      <span className="font-cursive text-2xl sm:text-3xl text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-200 to-amber-400 leading-none drop-shadow">
+                        r &amp; i
+                      </span>
+                      <Heart className="w-2.5 h-2.5 text-pink-300 fill-pink-300 mt-0.5 animate-pulse" />
+                    </div>
                   </motion.div>
                 </button>
 
-                {/* CTA Button Label */}
+                {/* Ultra-Luxury CTA Button (Buka Undangan) */}
                 <motion.button
-                  whileHover={{ scale: 1.04 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.96 }}
                   onClick={handleOpenClick}
-                  className="mt-3.5 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-stone-900 hover:bg-stone-800 text-amber-200 text-xs font-semibold tracking-wider uppercase shadow-lg shadow-black/20 transition-all border border-amber-300/30"
+                  className="group relative overflow-hidden inline-flex items-center gap-3 px-8 sm:px-10 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#2A050E] via-[#4A0E17] to-[#2A050E] text-amber-100 shadow-[0_10px_28px_rgba(74,14,23,0.45)] hover:shadow-[0_12px_36px_rgba(217,119,6,0.45)] transition-all duration-300 border-2 border-amber-300/80 cursor-pointer"
                 >
-                  <Mail className="w-3.5 h-3.5 text-pink-400" />
-                  <span>Buka Undangan</span>
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  {/* Moving Shimmer Reflection */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+
+                  {/* Golden Envelope Badge */}
+                  <div className="w-6 h-6 rounded-full bg-amber-400/20 border border-amber-300/50 flex items-center justify-center shrink-0">
+                    <Mail className="w-3.5 h-3.5 text-amber-300 group-hover:scale-110 transition-transform" />
+                  </div>
+
+                  {/* Luxurious Foil Lettering */}
+                  <span className="text-xs sm:text-sm font-serif font-bold tracking-[0.25em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-[#FDE68A] to-amber-300 drop-shadow">
+                    Buka Undangan
+                  </span>
+
+                  <Sparkles className="w-4 h-4 text-amber-300 animate-pulse shrink-0" />
                 </motion.button>
               </div>
             </div>
