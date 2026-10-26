@@ -25,7 +25,7 @@ function SingleBloomingRose() {
   ];
 
   return (
-    <Float speed={3} rotationIntensity={0.4} floatIntensity={0.7}>
+    <Float speed={3} rotationIntensity={0.35} floatIntensity={0.6}>
       <group ref={groupRef}>
         {/* Golden Center */}
         <mesh position={[0, 0.15, 0]}>
@@ -84,14 +84,23 @@ function SingleBloomingRose() {
 
 export default function SingleRoseScene() {
   return (
-    <div className="w-full h-full relative cursor-grab active:cursor-grabbing">
-      <Canvas camera={{ position: [0, 0, 3.6], fov: 45 }} gl={{ antialias: true, alpha: true }}>
-        <ambientLight intensity={1.5} />
+    <div className="w-full h-full relative cursor-grab active:cursor-grabbing touch-pan-y" style={{ touchAction: "pan-y" }}>
+      <Canvas
+        camera={{ position: [0, 0, 3.6], fov: 45 }}
+        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 2]}
+      >
+        <ambientLight intensity={1.6} />
         <directionalLight position={[4, 5, 4]} intensity={2.2} color="#FFF1F2" />
         <pointLight position={[-3, -2, 2]} intensity={1.5} color="#FB7185" />
         <SingleBloomingRose />
-        <Sparkles count={30} scale={4} size={2.5} color="#FDA4AF" opacity={0.7} />
-        <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
+        <Sparkles count={35} scale={4} size={2.5} color="#FDA4AF" opacity={0.75} />
+        <OrbitControls
+          enableZoom={false}
+          enablePan={false}
+          autoRotate={false}
+          rotateSpeed={0.8}
+        />
       </Canvas>
     </div>
   );

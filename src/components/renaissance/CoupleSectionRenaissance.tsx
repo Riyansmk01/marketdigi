@@ -2,7 +2,8 @@
 
 import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { RealisticCornerBouquet, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
+import { RealisticCornerBouquet, RealisticHeaderGarland, RealisticBotanicalImageCorner } from "@/components/ui/RealisticFloralAccent";
+import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 
 function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -24,12 +25,21 @@ function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 export default function CoupleSectionRenaissance() {
   return (
-    <section id="mempelai" className="py-24 px-4 md:px-8 bg-[#FDF6F8] relative overflow-hidden">
+    <section id="mempelai" className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-[#FDF6F8] relative overflow-hidden">
       {/* Decorative Toile Border & Wallpaper Texture */}
       <div
-        className="absolute inset-0 opacity-[0.14] pointer-events-none bg-repeat bg-center"
-        style={{ backgroundImage: "url('/images/vintage-toile-bg.jpg')", backgroundSize: "600px" }}
+        className="absolute inset-0 opacity-[0.16] pointer-events-none bg-repeat bg-center"
+        style={{ backgroundImage: "url('/images/bg-traditional-toile.png')", backgroundSize: "500px" }}
       />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#FDF6F8]/80 via-transparent to-[#FDF6F8]/85 pointer-events-none" />
+
+      {/* Dimensional Flying Doves */}
+      <div className="absolute top-12 left-8 w-16 sm:w-24 pointer-events-none z-10 opacity-70">
+        <FlyingDove direction="right" />
+      </div>
+      <div className="absolute top-16 right-8 w-16 sm:w-24 pointer-events-none z-10 opacity-70">
+        <FlyingDove direction="left" delay={1.6} />
+      </div>
 
       {/* Realistic Corner Bouquets for the section */}
       <RealisticCornerBouquet position="top-left" scale={0.85} />
@@ -37,7 +47,7 @@ export default function CoupleSectionRenaissance() {
 
       <div className="max-w-4xl mx-auto text-center relative z-10">
         {/* Intro Salutation (Exact Replica of Image 5) */}
-        <MotionReveal direction="up" className="mb-14">
+        <MotionReveal direction="up" className="mb-12 sm:mb-16">
           <p className="text-xs sm:text-sm font-serif text-stone-700 max-w-lg mx-auto leading-relaxed px-4">
             Dengan memohon Rahmat &amp; Ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami:
           </p>
@@ -45,17 +55,17 @@ export default function CoupleSectionRenaissance() {
         </MotionReveal>
 
         {/* Groom & Bride Grid (Exact Replica of Image 5) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
           {/* Mempelai Pria */}
           <MotionReveal direction="right" delay={0.1}>
-            <div className="flex flex-col items-center p-6 bg-white/70 backdrop-blur-sm rounded-[36px] border border-pink-200/80 shadow-xl shadow-pink-900/5 relative overflow-hidden">
-              <RealisticCornerBouquet position="top-left" scale={0.55} />
-              <RealisticCornerBouquet position="bottom-right" scale={0.55} />
+            <div className="flex flex-col items-center p-6 sm:p-8 bg-white/85 backdrop-blur-sm rounded-[36px] border-2 border-pink-200 shadow-xl shadow-pink-900/5 relative overflow-hidden">
+              <RealisticBotanicalImageCorner position="top-left" size="w-20 sm:w-28" className="opacity-75" />
+              <RealisticBotanicalImageCorner position="bottom-right" size="w-20 sm:w-28" className="opacity-75" />
 
               {/* Oval Frame with Cascading Realistic Watercolor Florals (Exact Replica of Image 5) */}
               <div className="relative mb-6">
                 {/* Oval Golden Window Frame */}
-                <div className="relative w-44 h-60 sm:w-52 sm:h-72 rounded-[100px] overflow-hidden border-2 border-amber-400/80 p-1 shadow-lg bg-stone-100 z-10">
+                <div className="relative w-44 h-60 sm:w-52 sm:h-72 rounded-[100px] overflow-hidden border-2 border-amber-400/90 p-1 shadow-lg bg-stone-100 z-10">
                   <div
                     className="w-full h-full rounded-[95px] bg-cover bg-center transition-transform duration-700 hover:scale-108"
                     style={{
@@ -66,9 +76,9 @@ export default function CoupleSectionRenaissance() {
                 </div>
 
                 {/* Left Realistic Floral Bouquet Accent */}
-                <RealisticCornerBouquet position="top-left" scale={0.65} className="z-20 -top-8 -left-8" />
+                <RealisticCornerBouquet position="top-left" scale={0.7} className="z-20 -top-8 -left-8" />
                 {/* Right Bottom Realistic Floral Bouquet Accent */}
-                <RealisticCornerBouquet position="bottom-right" scale={0.65} className="z-20 -bottom-8 -right-8" />
+                <RealisticCornerBouquet position="bottom-right" scale={0.7} className="z-20 -bottom-8 -right-8" />
               </div>
 
               {/* Cursive Name Accent (Exact Replica of 'Mega' in Image 5 -> 'Riyan') */}
@@ -82,7 +92,7 @@ export default function CoupleSectionRenaissance() {
               </h3>
 
               {/* Parent Lineage */}
-              <p className="text-xs text-stone-600 leading-relaxed max-w-xs mb-5">
+              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-xs mb-5">
                 Putra Pertama dari <br />
                 <strong className="text-stone-800 font-medium">Bapak Bambang Prasetyo &amp; Ibu Sri Wahyuni</strong>
               </p>
@@ -102,14 +112,14 @@ export default function CoupleSectionRenaissance() {
 
           {/* Mempelai Wanita */}
           <MotionReveal direction="left" delay={0.15}>
-            <div className="flex flex-col items-center p-6 bg-white/70 backdrop-blur-sm rounded-[36px] border border-pink-200/80 shadow-xl shadow-pink-900/5 relative overflow-hidden">
-              <RealisticCornerBouquet position="top-right" scale={0.55} />
-              <RealisticCornerBouquet position="bottom-left" scale={0.55} />
+            <div className="flex flex-col items-center p-6 sm:p-8 bg-white/85 backdrop-blur-sm rounded-[36px] border-2 border-pink-200 shadow-xl shadow-pink-900/5 relative overflow-hidden">
+              <RealisticBotanicalImageCorner position="top-right" size="w-20 sm:w-28" className="opacity-75" />
+              <RealisticBotanicalImageCorner position="bottom-left" size="w-20 sm:w-28" className="opacity-75" />
 
               {/* Oval Frame with Cascading Realistic Watercolor Florals (Exact Replica of Image 5) */}
               <div className="relative mb-6">
                 {/* Oval Golden Window Frame */}
-                <div className="relative w-44 h-60 sm:w-52 sm:h-72 rounded-[100px] overflow-hidden border-2 border-amber-400/80 p-1 shadow-lg bg-stone-100 z-10">
+                <div className="relative w-44 h-60 sm:w-52 sm:h-72 rounded-[100px] overflow-hidden border-2 border-amber-400/90 p-1 shadow-lg bg-stone-100 z-10">
                   <div
                     className="w-full h-full rounded-[95px] bg-cover bg-center transition-transform duration-700 hover:scale-108"
                     style={{
@@ -120,9 +130,9 @@ export default function CoupleSectionRenaissance() {
                 </div>
 
                 {/* Left Realistic Floral Bouquet Accent */}
-                <RealisticCornerBouquet position="top-left" scale={0.65} className="z-20 -top-8 -left-8" />
+                <RealisticCornerBouquet position="top-left" scale={0.7} className="z-20 -top-8 -left-8" />
                 {/* Right Bottom Realistic Floral Bouquet Accent */}
-                <RealisticCornerBouquet position="bottom-right" scale={0.65} className="z-20 -bottom-8 -right-8" />
+                <RealisticCornerBouquet position="bottom-right" scale={0.7} className="z-20 -bottom-8 -right-8" />
               </div>
 
               {/* Cursive Name Accent (Exact Replica of 'Mega' in Image 5 -> 'Intan') */}
@@ -136,7 +146,7 @@ export default function CoupleSectionRenaissance() {
               </h3>
 
               {/* Parent Lineage */}
-              <p className="text-xs text-stone-600 leading-relaxed max-w-xs mb-5">
+              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-xs mb-5">
                 Putri Kedua dari <br />
                 <strong className="text-stone-800 font-medium">Bapak Hendra Gunawan &amp; Ibu Ratna Dewi</strong>
               </p>
@@ -158,4 +168,3 @@ export default function CoupleSectionRenaissance() {
     </section>
   );
 }
-

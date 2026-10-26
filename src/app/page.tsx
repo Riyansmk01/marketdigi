@@ -25,6 +25,7 @@ import RenaissanceHero from "@/components/renaissance/RenaissanceHero";
 import WeFoundLoveSection from "@/components/renaissance/WeFoundLoveSection";
 import CoupleSectionRenaissance from "@/components/renaissance/CoupleSectionRenaissance";
 import { FloralSectionDivider } from "@/components/ui/DimensionalBotanicals";
+import { RealisticBotanicalImageCorner } from "@/components/ui/RealisticFloralAccent";
 import { Heart } from "lucide-react";
 
 export default function Home() {
@@ -48,7 +49,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen relative overflow-x-hidden pb-20 selection:bg-pink-200 selection:text-pink-900 bg-[#FDF6F8]">
+    <main className="min-h-screen relative overflow-x-hidden pb-24 selection:bg-pink-200 selection:text-pink-900 bg-[#FDF6F8]">
       {/* 1. Top Reading Scroll Progress Bar */}
       <ScrollProgressBar />
 
@@ -65,41 +66,48 @@ export default function Home() {
       {/* 4. Vinyl Music Player (Sal Priadi - Kita Usahakan Rumah Itu) */}
       <AudioPlayer autoPlayTrigger={startMusic} />
 
-      {/* 5. Floating Mobile Bottom Dock Navigation */}
+      {/* 5. Floating Mobile Bottom Dock Navigation (iOS Safe Area Ready) */}
       <FloatingNavigation />
 
       {/* 6. Smart WhatsApp Invitation Tool (Admin) */}
       <WhatsAppShareModal />
 
-      {/* 7. Renaissance & Vintage Toile Hero (Exact Replica of Image 1, 2, 3) */}
+      {/* 7. Renaissance & Vintage Toile Hero */}
       <RenaissanceHero />
 
-      {/* 8. We Found Love Section (Exact Replica of Image 4) */}
+      {/* 8. We Found Love Section */}
       <WeFoundLoveSection />
 
-      {/* 9. Couple Section with Oval Frames & Florals (Exact Replica of Image 5) */}
+      {/* 9. Couple Section with Oval Frames & Florals */}
       <CoupleSectionRenaissance />
 
-      {/* 10. 3D Blooming Rose Feature Spotlight */}
-      <section className="py-12 px-4 text-center bg-gradient-to-r from-pink-50/50 via-white to-pink-50/50 border-t border-b border-pink-100 relative overflow-hidden">
-        <MotionReveal direction="up" className="max-w-md mx-auto">
-          <p className="text-xs uppercase tracking-[0.25em] text-pink-700 font-semibold mb-1">
-            Simbol Cinta Abadi
-          </p>
-          <h3 className="text-xl md:text-2xl font-serif text-stone-900 mb-2">
-            Mawar Merah Muda 3D
-          </h3>
-          <p className="text-xs text-stone-500 leading-relaxed mb-1">
-            Melambangkan rasa syukur, kelembutan, dan janji suci kami untuk saling menjaga.
-          </p>
-          <InteractiveRoseFlower />
-          <span className="text-[10px] text-pink-700/80 italic">
-            * Putar kembang mawar untuk melihat setiap kelopaknya
-          </span>
-        </MotionReveal>
+      {/* 10. 3D Blooming Rose Feature Spotlight with Roman Rose Colonnade Arch */}
+      <section className="py-20 px-4 sm:px-6 md:px-8 text-center bg-gradient-to-b from-[#FFF5F7] via-white to-[#FFF5F7] border-t border-b border-pink-200/80 relative overflow-hidden">
+        {/* Subtle Toile & Filigree Background Ambience */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15 pointer-events-none"
+          style={{ backgroundImage: "url('/images/bg-floral-frame.png')" }}
+        />
+        <div className="max-w-xl mx-auto relative z-10">
+          <MotionReveal direction="up">
+            <p className="text-xs uppercase tracking-[0.25em] text-pink-700 font-semibold mb-1">
+              Simbol Cinta Abadi
+            </p>
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-serif text-stone-900 mb-2">
+              Mawar Merah Muda Berdimensi 3D
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed mb-2 font-light">
+              Melambangkan rasa syukur, kelembutan hati, dan janji suci kami untuk saling menjaga selamanya.
+            </p>
+            <InteractiveRoseFlower />
+            <span className="text-[11px] text-pink-800/80 italic font-serif block mt-2">
+              * Putar bunga mawar 3D untuk mengagumi setiap helai kelopaknya dari segala sudut
+            </span>
+          </MotionReveal>
+        </div>
       </section>
 
-      {/* 11. Event Details (Akad & Resepsi) */}
+      {/* 11. Event Details (Akad & Resepsi with Luxury Ballroom Backdrop) */}
       <EventDetails />
 
       {/* 12. Venue Map & Facilities Embed */}
@@ -132,22 +140,30 @@ export default function Home() {
       {/* 20. Digital Gift & Shipping Address */}
       <DigitalGift />
 
-      {/* 21. Family Honor Roll (Turut Mengundang) */}
+      {/* 21. Family Honor Roll (Turut Mengundang with Indonesian Architecture Tapestry) */}
       <FamilyHonorRoll />
 
       {/* 22. Wedding FAQ Section */}
       <WeddingFAQ />
 
       {/* 23. Elegant Footer */}
-      <footer className="py-20 px-4 text-center bg-[#4A0E17] text-pink-100 relative border-t border-pink-500/20">
-        <MotionReveal direction="up" className="max-w-md mx-auto space-y-4">
+      <footer className="py-20 px-4 sm:px-6 text-center bg-[#3B0713] text-pink-100 relative border-t border-pink-500/20 overflow-hidden">
+        {/* Subtle Background Filigree Texture in Footer */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10 pointer-events-none"
+          style={{ backgroundImage: "url('/images/bg-pink-filigree.png')" }}
+        />
+        <RealisticBotanicalImageCorner position="top-left" size="w-32 sm:w-44" className="opacity-70" />
+        <RealisticBotanicalImageCorner position="bottom-right" size="w-32 sm:w-44" className="opacity-70" />
+
+        <MotionReveal direction="up" className="max-w-md mx-auto space-y-4 relative z-10">
           <Heart className="w-6 h-6 text-pink-400 fill-pink-400/40 mx-auto animate-pulse" />
-          <h3 className="text-2xl font-serif text-amber-100">Riyan &amp; Intan</h3>
-          <p className="text-xs text-pink-200/80 leading-relaxed">
+          <h3 className="text-2xl sm:text-3xl font-serif text-amber-100">Riyan &amp; Intan</h3>
+          <p className="text-xs sm:text-sm text-pink-200/80 leading-relaxed font-light">
             Terima kasih atas doa, restu, dan kehadiran hangat Bapak/Ibu/Saudara/i sekalian dalam momen paling membahagiakan bagi kami berdua.
           </p>
-          <div className="pt-6 border-t border-pink-900/60 text-[11px] text-pink-300/60">
-            The Wedding of Riyan &amp; Intan &copy; 2026
+          <div className="pt-6 border-t border-pink-900/60 text-[11px] sm:text-xs text-pink-300/60 font-serif">
+            The Wedding of Riyan &amp; Intan &copy; 2026 &bull; All Rights Reserved
           </div>
         </MotionReveal>
       </footer>

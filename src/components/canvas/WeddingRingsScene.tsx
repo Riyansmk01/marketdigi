@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, OrbitControls, Sparkles, MeshReflectorMaterial } from "@react-three/drei";
+import { Float, OrbitControls, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 
 function SingleRing({
@@ -70,7 +70,7 @@ function InterlockingRings() {
   });
 
   return (
-    <Float speed={2} rotationIntensity={0.4} floatIntensity={0.6}>
+    <Float speed={2} rotationIntensity={0.35} floatIntensity={0.5}>
       <group ref={groupRef}>
         {/* Ring 1 - Groom Ring (Slightly larger, sleek) */}
         <SingleRing
@@ -96,7 +96,10 @@ function InterlockingRings() {
 
 export default function WeddingRingsScene() {
   return (
-    <div className="w-full h-full relative cursor-grab active:cursor-grabbing">
+    <div
+      className="w-full h-full relative cursor-grab active:cursor-grabbing touch-pan-y"
+      style={{ touchAction: "pan-y" }}
+    >
       <Canvas
         camera={{ position: [0, 0, 5], fov: 45 }}
         gl={{ antialias: true, alpha: true }}
@@ -120,6 +123,7 @@ export default function WeddingRingsScene() {
           maxPolarAngle={Math.PI / 1.7}
           minPolarAngle={Math.PI / 3}
           autoRotate={false}
+          rotateSpeed={0.8}
         />
       </Canvas>
     </div>

@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
 import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
-import { Send, CheckCircle2, XCircle, HelpCircle, MessageSquareHeart, Users, ThumbsUp } from "lucide-react";
+import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
+import { Send, CheckCircle2, XCircle, HelpCircle, MessageSquareHeart, Users, ThumbsUp, Sparkles } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { RSVPRecord, WishRecord } from "@/types/wedding";
 import confetti from "canvas-confetti";
@@ -104,42 +105,35 @@ export default function RSVPAndWishes() {
     setErrorMessage("");
 
     try {
-      const newEntry: RSVPRecord = {
+      const newRecord = {
         name: formData.name.trim(),
         attendance: formData.attendance,
-        guests_count: Number(formData.guests_count),
+        guests_count: formData.attendance === "hadir" ? formData.guests_count : 0,
         message: formData.message.trim(),
+        created_at: new Date().toISOString(),
       };
 
       if (isSupabaseConfigured && supabase) {
-        const { data, error } = await supabase
-          .from("rsvps")
-          .insert([newEntry])
-          .select();
-
+        const { error } = await supabase.from("rsvps").insert([newRecord]);
         if (error) throw error;
-
-        if (data && data[0]) {
-          setWishes((prev) => [data[0] as WishRecord, ...prev]);
-        }
-      } else {
-        const mockCreated: WishRecord = {
-          id: String(Date.now()),
-          name: newEntry.name,
-          attendance: newEntry.attendance,
-          message: newEntry.message || "",
-          created_at: new Date().toISOString(),
-        };
-        const updated = [mockCreated, ...wishes];
-        setWishes(updated);
-        localStorage.setItem("wedding_wishes_backup", JSON.stringify(updated));
       }
 
+      const updated = [
+        {
+          id: Date.now().toString(),
+          ...newRecord,
+        },
+        ...wishes,
+      ];
+      setWishes(updated);
+      localStorage.setItem("wedding_wishes_backup", JSON.stringify(updated.slice(0, 30)));
+
+      // Trigger Celebration Confetti
       confetti({
-        particleCount: 100,
+        particleCount: 70,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ["#D4AF37", "#10B981", "#F59E0B", "#F43F5E"],
+        colors: ["#F5D061", "#FB7185", "#FDA4AF", "#F43F5E"],
       });
 
       setSubmitSuccess(true);
@@ -160,44 +154,60 @@ export default function RSVPAndWishes() {
   };
 
   return (
-    <section id="rsvp" className="py-24 px-4 md:px-8 bg-stone-100/60 relative">
-      <div className="max-w-4xl mx-auto">
+    <section id="rsvp" className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-[#FDF6F8] relative overflow-hidden">
+      {/* Background Filigree Parchment Texture */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-25 pointer-events-none"
+        style={{ backgroundImage: "url('/images/bg-pink-filigree.png')" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#FDF6F8]/80 via-transparent to-[#FDF6F8]/90 pointer-events-none" />
+
+      {/* Dimensional Flying Doves */}
+      <div className="absolute top-12 left-6 w-16 sm:w-24 pointer-events-none z-10 opacity-70">
+        <FlyingDove direction="right" />
+      </div>
+
+      <RealisticBotanicalImageCorner position="top-left" size="w-36 sm:w-56" className="opacity-80" />
+      <RealisticBotanicalImageCorner position="bottom-right" size="w-36 sm:w-56" className="opacity-80" />
+
+      <div className="max-w-4xl mx-auto relative z-10">
         <MotionReveal direction="up" className="text-center mb-10">
-          <p className="text-amber-700 uppercase tracking-[0.3em] text-xs font-semibold mb-2">
+          <p className="text-pink-800 uppercase tracking-[0.3em] text-xs font-semibold mb-2">
             Konfirmasi Kehadiran &amp; Doa
           </p>
-          <h2 className="text-3xl md:text-5xl font-serif text-stone-900 mb-3">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-stone-900 mb-3">
             RSVP &amp; Ucapan Selamat
           </h2>
-          <p className="text-stone-600 text-sm max-w-lg mx-auto">
+          <p className="text-stone-600 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed font-light">
             Bantu kami mempersiapkan jamuan terbaik dengan mengonfirmasi kehadiran Anda di bawah ini.
           </p>
+          <RealisticHeaderGarland />
         </MotionReveal>
 
         {/* Live Attendance Stats Counter */}
         <MotionReveal direction="up" delay={0.1} className="mb-10">
           <div className="grid grid-cols-3 gap-3 max-w-lg mx-auto text-center">
-            <div className="bg-white p-3.5 rounded-2xl border border-emerald-200/80 shadow-sm">
-              <span className="text-2xl font-serif font-bold text-emerald-700 tabular-nums">
+            <div className="bg-white/95 backdrop-blur-sm p-3.5 rounded-2xl border-2 border-emerald-200 shadow-md">
+              <span className="text-2xl sm:text-3xl font-serif font-bold text-emerald-700 tabular-nums">
                 {totalHadir}
               </span>
-              <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold mt-0.5">
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-stone-600 font-semibold mt-0.5">
                 Pasti Hadir
               </p>
             </div>
-            <div className="bg-white p-3.5 rounded-2xl border border-amber-200/80 shadow-sm">
-              <span className="text-2xl font-serif font-bold text-amber-700 tabular-nums">
+            <div className="bg-white/95 backdrop-blur-sm p-3.5 rounded-2xl border-2 border-amber-200 shadow-md">
+              <span className="text-2xl sm:text-3xl font-serif font-bold text-amber-700 tabular-nums">
                 {totalRagu}
               </span>
-              <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold mt-0.5">
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-stone-600 font-semibold mt-0.5">
                 Masih Ragu
               </p>
             </div>
-            <div className="bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm">
-              <span className="text-2xl font-serif font-bold text-stone-600 tabular-nums">
+            <div className="bg-white/95 backdrop-blur-sm p-3.5 rounded-2xl border-2 border-stone-200 shadow-md">
+              <span className="text-2xl sm:text-3xl font-serif font-bold text-stone-600 tabular-nums">
                 {totalAbsen}
               </span>
-              <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold mt-0.5">
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-stone-600 font-semibold mt-0.5">
                 Berhalangan
               </p>
             </div>
@@ -207,10 +217,10 @@ export default function RSVPAndWishes() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* RSVP Form */}
           <MotionReveal direction="right" delay={0.15}>
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-pink-200/80 shadow-lg shadow-pink-900/5 relative overflow-hidden">
-              <RealisticBotanicalImageCorner position="top-right" size="w-28 sm:w-36" className="opacity-80" />
+            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border-2 border-pink-200 shadow-xl shadow-pink-900/10 relative overflow-hidden">
+              <RealisticBotanicalImageCorner position="top-right" size="w-24 sm:w-32" className="opacity-80" />
               <h3 className="text-xl font-serif text-stone-900 font-semibold mb-6 flex items-center gap-2">
-                <MessageSquareHeart className="w-5 h-5 text-amber-600" />
+                <MessageSquareHeart className="w-5 h-5 text-pink-600" />
                 <span>Kirim Konfirmasi &amp; Doa</span>
               </h3>
 
@@ -238,7 +248,7 @@ export default function RSVPAndWishes() {
                     placeholder="Contoh: Dimas Aditya & Keluarga"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none text-sm transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none text-base sm:text-sm transition-all"
                   />
                 </div>
 
@@ -263,7 +273,7 @@ export default function RSVPAndWishes() {
                         }
                         className={`py-2 px-3 rounded-xl border text-xs font-medium transition-all ${
                           formData.attendance === option.val
-                            ? "bg-amber-600 text-white border-amber-600 shadow-sm"
+                            ? "bg-pink-700 text-white border-pink-700 shadow-sm"
                             : "bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100"
                         }`}
                       >
@@ -283,7 +293,7 @@ export default function RSVPAndWishes() {
                       onChange={(e) =>
                         setFormData({ ...formData, guests_count: Number(e.target.value) })
                       }
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none text-sm bg-white"
+                      className="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none text-base sm:text-sm bg-white"
                     >
                       <option value={1}>1 Orang</option>
                       <option value={2}>2 Orang</option>
@@ -301,14 +311,14 @@ export default function RSVPAndWishes() {
                     placeholder="Tuliskan ucapan atau doa restu hangat untuk kedua mempelai..."
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none text-sm transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none text-base sm:text-sm transition-all resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white text-xs font-semibold tracking-wider uppercase shadow-md shadow-amber-900/15 transition-all flex items-center justify-center gap-2 disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99]"
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-700 via-rose-700 to-pink-800 hover:from-pink-800 hover:to-pink-900 text-white text-xs font-bold tracking-wider uppercase shadow-md shadow-pink-900/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99]"
                 >
                   {isSubmitting ? (
                     <span>Mengirim...</span>
@@ -325,13 +335,13 @@ export default function RSVPAndWishes() {
 
           {/* Guestbook Wishes Stream with Tabs */}
           <MotionReveal direction="left" delay={0.2}>
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-pink-200/80 shadow-lg shadow-pink-900/5 flex flex-col h-[520px] relative overflow-hidden">
-              <RealisticBotanicalImageCorner position="bottom-right" size="w-28 sm:w-36" className="opacity-80" />
+            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border-2 border-pink-200 shadow-xl shadow-pink-900/10 flex flex-col h-[520px] relative overflow-hidden">
+              <RealisticBotanicalImageCorner position="bottom-right" size="w-24 sm:w-32" className="opacity-80" />
               <div className="flex items-center justify-between mb-3 pb-3 border-b border-stone-100">
                 <h3 className="text-xl font-serif text-stone-900 font-semibold">
                   Buku Tamu &amp; Doa
                 </h3>
-                <span className="text-xs px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-medium">
+                <span className="text-xs px-3 py-1 rounded-full bg-pink-100 text-pink-900 font-semibold border border-pink-200">
                   {wishes.length} Doa Masuk
                 </span>
               </div>
@@ -348,8 +358,8 @@ export default function RSVPAndWishes() {
                     onClick={() => setFilter(t.key as "all" | "hadir" | "tidak_hadir")}
                     className={`px-3 py-1 rounded-full text-[11px] font-medium transition-colors ${
                       filter === t.key
-                        ? "bg-amber-600 text-white"
-                        : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                        ? "bg-pink-700 text-white"
+                        : "bg-pink-50 text-stone-600 hover:bg-pink-100"
                     }`}
                   >
                     {t.label}
@@ -366,14 +376,14 @@ export default function RSVPAndWishes() {
                   filteredWishes.map((item) => (
                     <div
                       key={item.id}
-                      className="p-4 rounded-2xl bg-[#FAF7F2] border border-amber-100/90 text-left transition-all hover:bg-amber-50/60"
+                      className="p-4 rounded-2xl bg-[#FFF5F7] border border-pink-100 text-left transition-all hover:bg-pink-50"
                     >
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-amber-200 text-amber-900 font-bold text-xs flex items-center justify-center uppercase shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-pink-200 text-pink-900 font-bold text-xs flex items-center justify-center uppercase shrink-0">
                             {item.name.charAt(0)}
                           </div>
-                          <span className="text-sm font-semibold text-stone-900 line-clamp-1">
+                          <span className="text-sm font-semibold text-stone-900 line-clamp-1 font-serif">
                             {item.name}
                           </span>
                         </div>
@@ -397,7 +407,7 @@ export default function RSVPAndWishes() {
                         </span>
                       </div>
                       {item.message && (
-                        <p className="text-xs text-stone-600 leading-relaxed break-words pl-10">
+                        <p className="text-xs text-stone-600 leading-relaxed break-words pl-10 font-serif">
                           {item.message}
                         </p>
                       )}

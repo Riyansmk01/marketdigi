@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
 import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
-import { HelpCircle, ChevronDown } from "lucide-react";
+import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
+import { HelpCircle, ChevronDown, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface FAQItem {
@@ -47,19 +48,34 @@ export default function WeddingFAQ() {
   };
 
   return (
-    <section className="py-20 px-4 md:px-8 bg-stone-100/60 border-t border-amber-200/50">
-      <div className="max-w-3xl mx-auto">
-        <MotionReveal direction="up" className="text-center mb-12">
-          <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center mx-auto mb-3 shadow-inner">
+    <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-[#FAF2F4] border-t border-pink-200/60 relative overflow-hidden">
+      {/* Background Filigree Parchment Texture */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-25 pointer-events-none"
+        style={{ backgroundImage: "url('/images/bg-pink-filigree.png')" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#FAF2F4]/80 via-transparent to-[#FAF2F4]/85 pointer-events-none" />
+
+      {/* Dimensional Flying Dove */}
+      <div className="absolute top-10 right-8 w-16 sm:w-20 pointer-events-none z-10 opacity-70">
+        <FlyingDove direction="left" />
+      </div>
+
+      <RealisticBotanicalImageCorner position="top-left" size="w-36 sm:w-48" className="opacity-80" />
+      <RealisticBotanicalImageCorner position="bottom-right" size="w-36 sm:w-48" className="opacity-80" />
+
+      <div className="max-w-3xl mx-auto relative z-10">
+        <MotionReveal direction="up" className="text-center mb-10 sm:mb-12">
+          <div className="w-12 h-12 rounded-full bg-pink-100 text-pink-700 flex items-center justify-center mx-auto mb-3 shadow-inner border border-pink-200">
             <HelpCircle className="w-6 h-6" />
           </div>
-          <p className="text-amber-700 uppercase tracking-[0.3em] text-xs font-semibold mb-2">
+          <p className="text-pink-800 uppercase tracking-[0.3em] text-xs font-semibold mb-2">
             Informasi Tambahan
           </p>
-          <h2 className="text-3xl md:text-5xl font-serif text-stone-900 mb-3">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-stone-900 mb-3">
             Pertanyaan Umum (FAQ)
           </h2>
-          <p className="text-stone-600 text-sm max-w-md mx-auto mb-2">
+          <p className="text-stone-600 text-xs sm:text-sm max-w-md mx-auto mb-2 font-light leading-relaxed">
             Pertanyaan yang sering ditanyakan tamu seputar kehadiran dan rangkaian acara pernikahan.
           </p>
           <RealisticHeaderGarland />
@@ -70,15 +86,15 @@ export default function WeddingFAQ() {
             const isOpen = openIndex === idx;
             return (
               <MotionReveal key={idx} direction="up" delay={idx * 0.08}>
-                <div className="bg-white rounded-2xl border border-amber-200/70 shadow-sm overflow-hidden transition-colors">
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl border-2 border-pink-200 shadow-sm overflow-hidden transition-colors">
                   <button
                     onClick={() => toggle(idx)}
-                    className="w-full p-5 text-left flex items-center justify-between gap-4 font-serif font-medium text-stone-900 hover:text-amber-800 transition-colors"
+                    className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 font-serif font-medium text-stone-900 hover:text-pink-800 transition-colors"
                   >
-                    <span className="text-sm md:text-base">{faq.question}</span>
+                    <span className="text-sm sm:text-base">{faq.question}</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-amber-700 shrink-0 transition-transform duration-300 ${
-                        isOpen ? "rotate-180 text-amber-800" : ""
+                      className={`w-4 h-4 text-pink-700 shrink-0 transition-transform duration-300 ${
+                        isOpen ? "rotate-180 text-pink-900" : ""
                       }`}
                     />
                   </button>
@@ -91,7 +107,7 @@ export default function WeddingFAQ() {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3 }}
                       >
-                        <div className="px-5 pb-5 text-xs md:text-sm text-stone-600 leading-relaxed border-t border-stone-100 pt-3">
+                        <div className="px-4 sm:px-5 pb-5 text-xs sm:text-sm text-stone-600 leading-relaxed border-t border-pink-100 pt-3">
                           {faq.answer}
                         </div>
                       </motion.div>

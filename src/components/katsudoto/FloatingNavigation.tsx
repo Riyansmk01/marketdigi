@@ -40,9 +40,9 @@ export default function FloatingNavigation() {
   return (
     <nav
       aria-label="Floating Mobile Navigation"
-      className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 max-w-[94vw] sm:max-w-md w-full px-2"
+      className="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 max-w-[95vw] sm:max-w-md w-full px-2"
     >
-      <div className="flex items-center justify-between bg-stone-900/85 backdrop-blur-xl border border-amber-500/25 px-3 py-2 rounded-full shadow-2xl shadow-black/40">
+      <div className="flex items-center justify-between bg-stone-900/90 backdrop-blur-xl border border-pink-400/30 px-2.5 sm:px-3 py-2 rounded-full shadow-2xl shadow-black/50">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
@@ -51,14 +51,14 @@ export default function FloatingNavigation() {
             <a
               key={item.id}
               href={item.href}
-              className={`flex flex-col items-center justify-center py-1 px-2 rounded-full transition-all duration-300 ${
+              className={`flex flex-col items-center justify-center py-1 px-1.5 sm:px-2 rounded-full transition-all duration-300 ${
                 isActive
-                  ? "text-amber-300 bg-amber-500/20 scale-105"
+                  ? "text-pink-300 bg-pink-500/25 scale-105"
                   : "text-stone-400 hover:text-stone-200"
               }`}
             >
-              <Icon className="w-4 h-4 mb-0.5" />
-              <span className="text-[9px] font-medium tracking-tight whitespace-nowrap">
+              <Icon className="w-3.5 sm:w-4 h-3.5 sm:h-4 mb-0.5" />
+              <span className="text-[8px] sm:text-[9px] font-medium tracking-tight whitespace-nowrap">
                 {item.label}
               </span>
             </a>
