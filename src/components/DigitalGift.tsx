@@ -24,7 +24,7 @@ const accounts: BankAccount[] = [
   {
     bankName: "Bank Mandiri",
     accountNumber: "1370018293041",
-    holderName: "Riyan Perdhanaputra",
+    holderName: "Riyan Perdhana Putra",
     logoText: "MANDIRI",
   },
 ];
