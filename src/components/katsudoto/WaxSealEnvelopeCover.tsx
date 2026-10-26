@@ -155,10 +155,10 @@ export default function WaxSealEnvelopeCover({
                   >
                     {/* Inner gold embossed ring */}
                     <div className="w-full h-full rounded-full border border-dashed border-amber-300/40 flex flex-col items-center justify-center bg-black/10">
-                      <span className="font-cursive text-2xl sm:text-3xl text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-200 to-amber-400 leading-none drop-shadow">
-                        r &amp; i
+                      <span className="font-serif font-bold text-lg sm:text-xl text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-200 to-amber-400 leading-none drop-shadow tracking-wider">
+                        R &amp; I
                       </span>
-                      <Heart className="w-2.5 h-2.5 text-pink-300 fill-pink-300 mt-0.5 animate-pulse" />
+                      <Heart className="w-2.5 h-2.5 text-pink-300 fill-pink-300 mt-1 animate-pulse" />
                     </div>
                   </motion.div>
                 </button>

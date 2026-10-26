@@ -46,17 +46,17 @@ export default function RenaissanceHero() {
             {/* Subtle Inner Gold Foil Border */}
             <div className="absolute inset-2.5 rounded-[32px] border border-amber-200/20 pointer-events-none" />
 
-            {/* Calligraphy Monogram (r & i) */}
+            {/* Royal Gold Monogram (R & I) */}
             <div className="relative mb-5 select-none flex items-center justify-center">
-              <div className="relative flex items-center justify-center gap-1">
-                <span className="font-cursive text-7xl sm:text-8xl md:text-9xl text-transparent bg-clip-text bg-gradient-to-b from-[#FFFBEB] via-[#FDE68A] to-[#D97706] tracking-normal drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] leading-none">
-                  r
+              <div className="relative flex items-center justify-center gap-2">
+                <span className="font-serif text-6xl sm:text-7xl md:text-8xl font-normal text-transparent bg-clip-text bg-gradient-to-b from-[#FFFBEB] via-[#FDE68A] to-[#D97706] drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] leading-none">
+                  R
                 </span>
-                <span className="font-serif italic text-2xl sm:text-3xl text-amber-300/90 mx-1 -mt-3 drop-shadow">
+                <span className="font-serif italic text-2xl sm:text-3xl md:text-4xl text-amber-300/90 drop-shadow -mt-1">
                   &amp;
                 </span>
-                <span className="font-cursive text-7xl sm:text-8xl md:text-9xl text-transparent bg-clip-text bg-gradient-to-b from-[#FFFBEB] via-[#FDE68A] to-[#D97706] tracking-normal drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] leading-none">
-                  i
+                <span className="font-serif text-6xl sm:text-7xl md:text-8xl font-normal text-transparent bg-clip-text bg-gradient-to-b from-[#FFFBEB] via-[#FDE68A] to-[#D97706] drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] leading-none">
+                  I
                 </span>
               </div>
             </div>
