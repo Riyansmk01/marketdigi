@@ -2,6 +2,7 @@
 
 import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
+import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { MapPin, Navigation, Car, Heart, Shield, Compass } from "lucide-react";
 
 const facilities = [
@@ -35,7 +36,9 @@ export default function VenueMapEmbed() {
 
         {/* Embedded Interactive Map Card */}
         <MotionReveal direction="zoom" delay={0.15}>
-          <div className="bg-white rounded-3xl p-4 md:p-6 border border-amber-200/80 shadow-xl shadow-stone-900/5 mb-8">
+          <div className="bg-white rounded-3xl p-4 md:p-6 border border-pink-200/80 shadow-xl shadow-pink-900/5 mb-8 relative overflow-hidden">
+            <RealisticBotanicalImageCorner position="top-right" size="w-32 sm:w-44" className="opacity-90" />
+            <RealisticBotanicalImageCorner position="bottom-left" size="w-32 sm:w-44" className="opacity-90" />
             <div className="w-full h-80 md:h-96 rounded-2xl overflow-hidden border border-stone-200 shadow-inner relative">
               <iframe
                 title="Peta Lokasi Plataran Dharmawangsa"

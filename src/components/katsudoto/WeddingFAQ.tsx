@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
+import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { HelpCircle, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -58,9 +59,10 @@ export default function WeddingFAQ() {
           <h2 className="text-3xl md:text-5xl font-serif text-stone-900 mb-3">
             Pertanyaan Umum (FAQ)
           </h2>
-          <p className="text-stone-600 text-sm max-w-md mx-auto">
+          <p className="text-stone-600 text-sm max-w-md mx-auto mb-2">
             Pertanyaan yang sering ditanyakan tamu seputar kehadiran dan rangkaian acara pernikahan.
           </p>
+          <RealisticHeaderGarland />
         </MotionReveal>
 
         <div className="space-y-3.5">

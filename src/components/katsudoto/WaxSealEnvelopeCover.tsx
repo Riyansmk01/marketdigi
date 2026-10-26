@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Sparkles, Heart } from "lucide-react";
+import { RealisticBotanicalImageCorner } from "@/components/ui/RealisticFloralAccent";
 import confetti from "canvas-confetti";
 
 interface WaxSealEnvelopeCoverProps {
@@ -66,6 +67,8 @@ export default function WaxSealEnvelopeCover({
           >
             {/* Outer Envelope Card */}
             <div className="relative w-full bg-[#FFF5F7] rounded-3xl p-7 md:p-9 shadow-2xl shadow-black/70 border border-pink-200/90 text-center overflow-hidden">
+              <RealisticBotanicalImageCorner position="top-right" size="w-28 sm:w-36" className="opacity-80" />
+              <RealisticBotanicalImageCorner position="bottom-left" size="w-28 sm:w-36" className="opacity-80" />
               {/* Subtle Double Pink/Gold Border */}
               <div className="absolute inset-2.5 rounded-2xl border border-pink-700/15 pointer-events-none" />
               <div className="absolute inset-3 rounded-2xl border border-dashed border-pink-400/20 pointer-events-none" />

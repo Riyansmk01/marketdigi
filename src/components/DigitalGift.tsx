@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
+import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { Copy, Check, Gift, CreditCard, MapPin } from "lucide-react";
 
 interface BankAccount {
@@ -103,7 +104,8 @@ export default function DigitalGift() {
 
         {/* Physical Gift Address Card */}
         <MotionReveal direction="up" delay={0.2}>
-          <div className="bg-white rounded-3xl p-6 md:p-8 border border-amber-200/80 shadow-lg shadow-stone-900/5 text-left">
+          <div className="bg-white rounded-3xl p-6 md:p-8 border border-pink-200/80 shadow-lg shadow-pink-900/5 text-left relative overflow-hidden">
+            <RealisticBotanicalImageCorner position="top-right" size="w-24 sm:w-32" className="opacity-80" />
             <div className="flex items-center gap-3 mb-2">
               <MapPin className="w-5 h-5 text-amber-700 shrink-0" />
               <h4 className="font-serif font-semibold text-stone-900 text-base">

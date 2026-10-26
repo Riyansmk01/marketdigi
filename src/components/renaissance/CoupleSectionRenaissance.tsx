@@ -2,6 +2,7 @@
 
 import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
+import { RealisticCornerBouquet, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 
 function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -30,21 +31,28 @@ export default function CoupleSectionRenaissance() {
         style={{ backgroundImage: "url('/images/vintage-toile-bg.jpg')", backgroundSize: "600px" }}
       />
 
+      {/* Realistic Corner Bouquets for the section */}
+      <RealisticCornerBouquet position="top-left" scale={0.85} />
+      <RealisticCornerBouquet position="bottom-right" scale={0.85} />
+
       <div className="max-w-4xl mx-auto text-center relative z-10">
         {/* Intro Salutation (Exact Replica of Image 5) */}
-        <MotionReveal direction="up" className="mb-16">
+        <MotionReveal direction="up" className="mb-14">
           <p className="text-xs sm:text-sm font-serif text-stone-700 max-w-lg mx-auto leading-relaxed px-4">
             Dengan memohon Rahmat &amp; Ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami:
           </p>
-          <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-[#881337]/50 to-transparent mx-auto mt-4" />
+          <RealisticHeaderGarland />
         </MotionReveal>
 
         {/* Groom & Bride Grid (Exact Replica of Image 5) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
           {/* Mempelai Pria */}
           <MotionReveal direction="right" delay={0.1}>
-            <div className="flex flex-col items-center p-6 bg-white/70 backdrop-blur-sm rounded-[36px] border border-pink-200/80 shadow-xl shadow-pink-900/5 relative">
-              {/* Oval Frame with Cascading Watercolor Florals (Exact Replica of Image 5) */}
+            <div className="flex flex-col items-center p-6 bg-white/70 backdrop-blur-sm rounded-[36px] border border-pink-200/80 shadow-xl shadow-pink-900/5 relative overflow-hidden">
+              <RealisticCornerBouquet position="top-left" scale={0.55} />
+              <RealisticCornerBouquet position="bottom-right" scale={0.55} />
+
+              {/* Oval Frame with Cascading Realistic Watercolor Florals (Exact Replica of Image 5) */}
               <div className="relative mb-6">
                 {/* Oval Golden Window Frame */}
                 <div className="relative w-44 h-60 sm:w-52 sm:h-72 rounded-[100px] overflow-hidden border-2 border-amber-400/80 p-1 shadow-lg bg-stone-100 z-10">
@@ -57,27 +65,10 @@ export default function CoupleSectionRenaissance() {
                   />
                 </div>
 
-                {/* Left Floral Accent */}
-                <div className="absolute -left-6 top-8 w-24 h-36 pointer-events-none select-none z-20">
-                  <svg viewBox="0 0 100 140" className="w-full h-full filter drop-shadow-md" fill="none">
-                    <circle cx="45" cy="50" r="24" fill="#881337" opacity="0.9" />
-                    <circle cx="45" cy="50" r="16" fill="#BE185D" />
-                    <circle cx="45" cy="50" r="8" fill="#FB7185" />
-                    <circle cx="45" cy="50" r="2.5" fill="#FDE047" />
-                    <circle cx="30" cy="95" r="18" fill="#F472B6" opacity="0.85" />
-                    <circle cx="30" cy="95" r="10" fill="#FDA4AF" />
-                  </svg>
-                </div>
-
-                {/* Right Bottom Floral Accent */}
-                <div className="absolute -right-6 bottom-4 w-24 h-36 pointer-events-none select-none z-20">
-                  <svg viewBox="0 0 100 140" className="w-full h-full filter drop-shadow-md" fill="none">
-                    <circle cx="55" cy="80" r="24" fill="#881337" opacity="0.9" />
-                    <circle cx="55" cy="80" r="16" fill="#BE185D" />
-                    <circle cx="55" cy="80" r="8" fill="#FB7185" />
-                    <circle cx="55" cy="80" r="2.5" fill="#FDE047" />
-                  </svg>
-                </div>
+                {/* Left Realistic Floral Bouquet Accent */}
+                <RealisticCornerBouquet position="top-left" scale={0.65} className="z-20 -top-8 -left-8" />
+                {/* Right Bottom Realistic Floral Bouquet Accent */}
+                <RealisticCornerBouquet position="bottom-right" scale={0.65} className="z-20 -bottom-8 -right-8" />
               </div>
 
               {/* Cursive Name Accent (Exact Replica of 'Mega' in Image 5 -> 'Riyan') */}
@@ -111,8 +102,11 @@ export default function CoupleSectionRenaissance() {
 
           {/* Mempelai Wanita */}
           <MotionReveal direction="left" delay={0.15}>
-            <div className="flex flex-col items-center p-6 bg-white/70 backdrop-blur-sm rounded-[36px] border border-pink-200/80 shadow-xl shadow-pink-900/5 relative">
-              {/* Oval Frame with Cascading Watercolor Florals (Exact Replica of Image 5) */}
+            <div className="flex flex-col items-center p-6 bg-white/70 backdrop-blur-sm rounded-[36px] border border-pink-200/80 shadow-xl shadow-pink-900/5 relative overflow-hidden">
+              <RealisticCornerBouquet position="top-right" scale={0.55} />
+              <RealisticCornerBouquet position="bottom-left" scale={0.55} />
+
+              {/* Oval Frame with Cascading Realistic Watercolor Florals (Exact Replica of Image 5) */}
               <div className="relative mb-6">
                 {/* Oval Golden Window Frame */}
                 <div className="relative w-44 h-60 sm:w-52 sm:h-72 rounded-[100px] overflow-hidden border-2 border-amber-400/80 p-1 shadow-lg bg-stone-100 z-10">
@@ -125,27 +119,10 @@ export default function CoupleSectionRenaissance() {
                   />
                 </div>
 
-                {/* Left Floral Accent */}
-                <div className="absolute -left-6 top-8 w-24 h-36 pointer-events-none select-none z-20">
-                  <svg viewBox="0 0 100 140" className="w-full h-full filter drop-shadow-md" fill="none">
-                    <circle cx="45" cy="50" r="24" fill="#881337" opacity="0.9" />
-                    <circle cx="45" cy="50" r="16" fill="#BE185D" />
-                    <circle cx="45" cy="50" r="8" fill="#FB7185" />
-                    <circle cx="45" cy="50" r="2.5" fill="#FDE047" />
-                    <circle cx="30" cy="95" r="18" fill="#F472B6" opacity="0.85" />
-                    <circle cx="30" cy="95" r="10" fill="#FDA4AF" />
-                  </svg>
-                </div>
-
-                {/* Right Bottom Floral Accent */}
-                <div className="absolute -right-6 bottom-4 w-24 h-36 pointer-events-none select-none z-20">
-                  <svg viewBox="0 0 100 140" className="w-full h-full filter drop-shadow-md" fill="none">
-                    <circle cx="55" cy="80" r="24" fill="#881337" opacity="0.9" />
-                    <circle cx="55" cy="80" r="16" fill="#BE185D" />
-                    <circle cx="55" cy="80" r="8" fill="#FB7185" />
-                    <circle cx="55" cy="80" r="2.5" fill="#FDE047" />
-                  </svg>
-                </div>
+                {/* Left Realistic Floral Bouquet Accent */}
+                <RealisticCornerBouquet position="top-left" scale={0.65} className="z-20 -top-8 -left-8" />
+                {/* Right Bottom Realistic Floral Bouquet Accent */}
+                <RealisticCornerBouquet position="bottom-right" scale={0.65} className="z-20 -bottom-8 -right-8" />
               </div>
 
               {/* Cursive Name Accent (Exact Replica of 'Mega' in Image 5 -> 'Intan') */}
@@ -181,3 +158,4 @@ export default function CoupleSectionRenaissance() {
     </section>
   );
 }
+

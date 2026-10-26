@@ -2,6 +2,7 @@
 
 import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
+import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { Users, Heart } from "lucide-react";
 
 export default function FamilyHonorRoll() {
@@ -26,7 +27,8 @@ export default function FamilyHonorRoll() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
           {/* Keluarga Mempelai Pria */}
           <MotionReveal direction="right" delay={0.1}>
-            <div className="bg-white rounded-3xl p-7 border border-amber-200/80 shadow-md">
+            <div className="bg-white rounded-3xl p-7 border border-pink-200/80 shadow-md relative overflow-hidden">
+              <RealisticBotanicalImageCorner position="top-right" size="w-24 sm:w-32" className="opacity-80" />
               <span className="inline-block px-3 py-1 rounded-full bg-amber-100/90 text-amber-900 text-[10px] font-bold tracking-widest uppercase mb-4">
                 Keluarga Mempelai Pria
               </span>
@@ -56,7 +58,8 @@ export default function FamilyHonorRoll() {
 
           {/* Keluarga Mempelai Wanita */}
           <MotionReveal direction="left" delay={0.15}>
-            <div className="bg-white rounded-3xl p-7 border border-amber-200/80 shadow-md">
+            <div className="bg-white rounded-3xl p-7 border border-pink-200/80 shadow-md relative overflow-hidden">
+              <RealisticBotanicalImageCorner position="top-right" size="w-24 sm:w-32" className="opacity-80" />
               <span className="inline-block px-3 py-1 rounded-full bg-amber-100/90 text-amber-900 text-[10px] font-bold tracking-widest uppercase mb-4">
                 Keluarga Mempelai Wanita
               </span>

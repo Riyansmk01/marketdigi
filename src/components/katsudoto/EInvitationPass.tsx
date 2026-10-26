@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
+import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { QRCodeSVG } from "qrcode.react";
 import { Download, Share2, Check, ShieldCheck, Ticket } from "lucide-react";
 
@@ -57,8 +58,10 @@ export default function EInvitationPass({ guestName }: EInvitationPassProps) {
         <MotionReveal direction="zoom" delay={0.15}>
           <div
             ref={cardRef}
-            className="relative max-w-sm mx-auto bg-white rounded-3xl border border-amber-200/90 shadow-2xl shadow-stone-900/10 overflow-hidden text-left transition-transform hover:-translate-y-1.5 duration-500"
+            className="relative max-w-sm mx-auto bg-white rounded-3xl border border-pink-200/90 shadow-2xl shadow-pink-900/10 overflow-hidden text-left transition-transform hover:-translate-y-1.5 duration-500"
           >
+            <RealisticBotanicalImageCorner position="top-right" size="w-28 sm:w-36" className="opacity-90" />
+            <RealisticBotanicalImageCorner position="bottom-left" size="w-28 sm:w-36" className="opacity-90" />
             {/* Ticket Header */}
             <div className="bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 p-6 text-stone-100 relative">
               <div className="flex items-center justify-between mb-3">
