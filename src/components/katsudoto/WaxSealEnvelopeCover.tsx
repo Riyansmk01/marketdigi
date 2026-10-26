@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Sparkles, Heart } from "lucide-react";
-import { RealisticBotanicalImageCorner } from "@/components/ui/RealisticFloralAccent";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 import confetti from "canvas-confetti";
 
@@ -85,9 +84,6 @@ export default function WaxSealEnvelopeCover({
               className="relative w-full bg-[#FFF5F7] rounded-3xl p-6 sm:p-9 shadow-2xl shadow-black/80 border border-pink-300/80 text-center overflow-hidden bg-cover bg-center"
               style={{ backgroundImage: "linear-gradient(rgba(255,245,247,0.92), rgba(255,245,247,0.95)), url('/images/bg-pink-filigree.png')" }}
             >
-              <RealisticBotanicalImageCorner position="top-right" size="w-28 sm:w-36" className="opacity-90" />
-              <RealisticBotanicalImageCorner position="bottom-left" size="w-28 sm:w-36" className="opacity-90" />
-
               {/* Subtle Double Pink/Gold Border */}
               <div className="absolute inset-2.5 rounded-2xl border border-pink-700/20 pointer-events-none" />
               <div className="absolute inset-3 rounded-2xl border border-dashed border-amber-600/30 pointer-events-none" />

@@ -2,7 +2,7 @@
 
 import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
+import { RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 import { Calendar, Clock, MapPin, ExternalLink, Sparkles } from "lucide-react";
 
@@ -29,10 +29,6 @@ export default function EventDetails() {
         <FlyingDove direction="right" delay={2} />
       </div>
 
-      {/* Realistic Botanical Corners for Section */}
-      <RealisticBotanicalImageCorner position="top-left" size="w-40 sm:w-60 md:w-72" className="opacity-90" />
-      <RealisticBotanicalImageCorner position="bottom-right" size="w-40 sm:w-60 md:w-72" className="opacity-90" />
-
       <div className="max-w-4xl mx-auto text-center relative z-10">
         <MotionReveal direction="up">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-200 text-xs font-semibold uppercase tracking-[0.25em] mb-3 backdrop-blur-sm">
@@ -52,7 +48,6 @@ export default function EventDetails() {
           {/* Akad Nikah Card */}
           <MotionReveal direction="up" delay={0.1}>
             <div className="h-full bg-[#FFF5F7]/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border-2 border-amber-300/60 shadow-2xl shadow-black/50 relative overflow-hidden text-left flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1">
-              <RealisticBotanicalImageCorner position="top-right" size="w-28 sm:w-36" className="opacity-90" />
               <div>
                 <div className="inline-block px-3.5 py-1 rounded-full bg-pink-100 text-pink-900 text-xs font-bold uppercase tracking-wider mb-5 border border-pink-200">
                   Akad Nikah
@@ -94,7 +89,6 @@ export default function EventDetails() {
           {/* Resepsi Pernikahan Card */}
           <MotionReveal direction="up" delay={0.2}>
             <div className="h-full bg-[#FFF5F7]/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border-2 border-amber-300/60 shadow-2xl shadow-black/50 relative overflow-hidden text-left flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1">
-              <RealisticBotanicalImageCorner position="top-right" size="w-28 sm:w-36" className="opacity-90" />
               <div>
                 <div className="inline-block px-3.5 py-1 rounded-full bg-pink-100 text-pink-900 text-xs font-bold uppercase tracking-wider mb-5 border border-pink-200">
                   Resepsi Pernikahan

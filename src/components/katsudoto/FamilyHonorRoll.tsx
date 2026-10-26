@@ -2,7 +2,7 @@
 
 import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
+import { RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 import { Users, Heart, Sparkles } from "lucide-react";
 
@@ -21,10 +21,6 @@ export default function FamilyHonorRoll() {
       <div className="absolute top-10 right-10 w-20 sm:w-28 pointer-events-none z-10 opacity-70">
         <FlyingDove direction="left" />
       </div>
-
-      {/* Realistic Botanical Corners */}
-      <RealisticBotanicalImageCorner position="top-left" size="w-36 sm:w-52" className="opacity-80" />
-      <RealisticBotanicalImageCorner position="bottom-right" size="w-36 sm:w-52" className="opacity-80" />
 
       <div className="max-w-4xl mx-auto text-center relative z-10">
         <MotionReveal direction="up">
@@ -47,7 +43,6 @@ export default function FamilyHonorRoll() {
           {/* Keluarga Mempelai Pria */}
           <MotionReveal direction="right" delay={0.1}>
             <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border-2 border-pink-200/90 shadow-xl shadow-pink-900/5 relative overflow-hidden transition-transform duration-300 hover:-translate-y-1">
-              <RealisticBotanicalImageCorner position="top-right" size="w-24 sm:w-32" className="opacity-85" />
               <span className="inline-block px-3.5 py-1 rounded-full bg-pink-100 text-pink-900 text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-4 border border-pink-200">
                 Keluarga Mempelai Pria
               </span>
@@ -78,7 +73,6 @@ export default function FamilyHonorRoll() {
           {/* Keluarga Mempelai Wanita */}
           <MotionReveal direction="left" delay={0.15}>
             <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border-2 border-pink-200/90 shadow-xl shadow-pink-900/5 relative overflow-hidden transition-transform duration-300 hover:-translate-y-1">
-              <RealisticBotanicalImageCorner position="top-right" size="w-24 sm:w-32" className="opacity-85" />
               <span className="inline-block px-3.5 py-1 rounded-full bg-pink-100 text-pink-900 text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-4 border border-pink-200">
                 Keluarga Mempelai Wanita
               </span>

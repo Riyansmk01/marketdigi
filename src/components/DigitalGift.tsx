@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
+import { RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 import { Copy, Check, Gift, CreditCard, MapPin, Sparkles } from "lucide-react";
 import confetti from "canvas-confetti";
@@ -71,10 +71,6 @@ export default function DigitalGift() {
         <FlyingDove direction="right" />
       </div>
 
-      {/* Realistic Botanical Corners */}
-      <RealisticBotanicalImageCorner position="top-right" size="w-36 sm:w-56" className="opacity-80" />
-      <RealisticBotanicalImageCorner position="bottom-left" size="w-36 sm:w-56" className="opacity-80" />
-
       <div className="max-w-3xl mx-auto text-center relative z-10">
         <MotionReveal direction="up">
           <div className="w-12 h-12 rounded-full bg-pink-100 text-pink-700 flex items-center justify-center mx-auto mb-3 shadow-inner border border-pink-200">
@@ -100,7 +96,6 @@ export default function DigitalGift() {
                 className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-7 border-2 border-pink-200 shadow-xl shadow-pink-900/10 relative overflow-hidden transition-transform hover:-translate-y-1 duration-300"
                 style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url('/images/bg-pink-filigree.png')", backgroundSize: "cover" }}
               >
-                <RealisticBotanicalImageCorner position="top-right" size="w-20 sm:w-28" className="opacity-70" />
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xs font-bold tracking-wider text-pink-900 bg-pink-100 px-3 py-1 rounded-lg border border-pink-200">
                     {acc.logoText}
@@ -137,7 +132,6 @@ export default function DigitalGift() {
         {/* Physical Gift / Delivery Address Card */}
         <MotionReveal direction="up" delay={0.25}>
           <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-7 border-2 border-pink-200 shadow-xl shadow-pink-900/10 text-left relative overflow-hidden">
-            <RealisticBotanicalImageCorner position="top-right" size="w-24 sm:w-32" className="opacity-70" />
             <div className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-full bg-pink-100 text-pink-700 flex items-center justify-center shrink-0">
                 <MapPin className="w-4 h-4" />

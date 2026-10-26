@@ -2,7 +2,7 @@
 
 import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
+import { RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 import { Heart, Sparkles } from "lucide-react";
 
@@ -49,9 +49,6 @@ export default function LoveStory() {
       <div className="absolute top-12 left-6 w-16 sm:w-24 pointer-events-none z-10 opacity-70">
         <FlyingDove direction="right" />
       </div>
-
-      <RealisticBotanicalImageCorner position="top-right" size="w-36 sm:w-52" className="opacity-80" />
-      <RealisticBotanicalImageCorner position="bottom-left" size="w-36 sm:w-52" className="opacity-80" />
 
       <div className="max-w-3xl mx-auto text-center relative z-10">
         <MotionReveal direction="up">

@@ -24,7 +24,6 @@ import RenaissanceHero from "@/components/renaissance/RenaissanceHero";
 import WeFoundLoveSection from "@/components/renaissance/WeFoundLoveSection";
 import CoupleSectionRenaissance from "@/components/renaissance/CoupleSectionRenaissance";
 import { FloralSectionDivider } from "@/components/ui/DimensionalBotanicals";
-import { RealisticBotanicalImageCorner } from "@/components/ui/RealisticFloralAccent";
 import { Heart } from "lucide-react";
 
 export default function Home() {
@@ -129,8 +128,6 @@ export default function Home() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10 pointer-events-none"
           style={{ backgroundImage: "url('/images/bg-pink-filigree.png')" }}
         />
-        <RealisticBotanicalImageCorner position="top-left" size="w-32 sm:w-44" className="opacity-70" />
-        <RealisticBotanicalImageCorner position="bottom-right" size="w-32 sm:w-44" className="opacity-70" />
 
         <MotionReveal direction="up" className="max-w-md mx-auto space-y-4 relative z-10">
           <Heart className="w-6 h-6 text-pink-400 fill-pink-400/40 mx-auto animate-pulse" />

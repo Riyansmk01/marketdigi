@@ -4,7 +4,6 @@ import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
 import { RealisticCornerBouquet } from "@/components/ui/RealisticFloralAccent";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
-import { Heart, Sparkles } from "lucide-react";
 
 export default function WeFoundLoveSection() {
   return (
@@ -26,10 +25,6 @@ export default function WeFoundLoveSection() {
         <FlyingDove direction="right" delay={1.8} />
       </div>
 
-      {/* Realistic Corner Florals */}
-      <RealisticCornerBouquet position="top-left" scale={0.85} className="opacity-80" />
-      <RealisticCornerBouquet position="bottom-right" scale={0.85} className="opacity-80" />
-
       <div className="max-w-xl mx-auto flex flex-col items-center text-center relative z-10">
         {/* Prewedding Photo Frame with Cascading Realistic Corner Flowers (Exact Replica of Image 4) */}
         <MotionReveal direction="zoom" duration={0.9} className="relative mb-8 sm:mb-10 w-full max-w-sm sm:max-w-md">
@@ -47,7 +42,7 @@ export default function WeFoundLoveSection() {
           </div>
 
           {/* Cascading Realistic Floral Bouquet on Top Right Corner (Exact Replica of Image 4) */}
-          <RealisticCornerBouquet position="top-right" scale={1.15} />
+          <RealisticCornerBouquet position="top-right" scale={1.05} />
         </MotionReveal>
 
         {/* Section Headline (Exact Replica of Image 4) */}

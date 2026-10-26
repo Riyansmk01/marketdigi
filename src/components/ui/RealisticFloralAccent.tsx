@@ -13,8 +13,14 @@ export function RealisticCornerBouquet({
   className?: string;
   scale?: number;
 }) {
-  const isLeft = position.includes("left");
+  const isRight = position.includes("right");
   const isBottom = position.includes("bottom");
+
+  // Original image corner is TOP-LEFT.
+  // To place in top-right, flip horizontally: scaleX(-1).
+  // To place in bottom-left, flip vertically: scaleY(-1).
+  // To place in bottom-right, flip both: scaleX(-1) scaleY(-1).
+  const transform = `scale(${scale}) ${isRight ? "scaleX(-1)" : "scaleX(1)"} ${isBottom ? "scaleY(-1)" : "scaleY(1)"}`;
 
   return (
     <motion.div
@@ -22,17 +28,18 @@ export function RealisticCornerBouquet({
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-      className={`absolute pointer-events-none select-none z-20 w-36 h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 ${
-        isLeft ? "-left-4 sm:-left-6" : "-right-4 sm:-right-6"
-      } ${isBottom ? "-bottom-4 sm:-bottom-6" : "-top-4 sm:-top-6"} ${className}`}
+      className={`absolute pointer-events-none select-none z-20 w-32 h-32 sm:w-44 sm:h-44 md:w-52 md:h-52 ${
+        isRight ? "-right-2 sm:-right-3" : "-left-2 sm:-left-3"
+      } ${isBottom ? "-bottom-2 sm:-bottom-3" : "-top-2 sm:-top-3"} ${className}`}
       style={{
-        transform: `scale(${scale}) ${isLeft ? "scaleX(-1)" : ""} ${isBottom ? "scaleY(-1)" : ""}`,
+        transform,
+        transformOrigin: `${isRight ? "right" : "left"} ${isBottom ? "bottom" : "top"}`,
       }}
     >
       <img
         src="/images/realistic-corner-transparent.png"
         alt="Realistic Botanical Corner Flower"
-        className="w-full h-full object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
+        className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)]"
       />
     </motion.div>
   );
@@ -42,32 +49,35 @@ export function RealisticCornerBouquet({
 export function RealisticBotanicalImageCorner({
   position = "top-right",
   className = "",
-  size = "w-36 sm:w-48 md:w-56",
+  size = "w-32 sm:w-40 md:w-48",
 }: {
   position?: "top-right" | "top-left" | "bottom-right" | "bottom-left";
   className?: string;
   size?: string;
 }) {
-  const isLeft = position.includes("left");
+  const isRight = position.includes("right");
   const isBottom = position.includes("bottom");
+
+  const transform = `${isRight ? "scaleX(-1)" : "scaleX(1)"} ${isBottom ? "scaleY(-1)" : "scaleY(1)"}`;
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.88 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
-      transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       className={`absolute pointer-events-none select-none z-20 ${size} aspect-square ${
-        isLeft ? "-left-4 sm:-left-6" : "-right-4 sm:-right-6"
-      } ${isBottom ? "-bottom-4 sm:-bottom-6" : "-top-4 sm:-top-6"} ${className}`}
+        isRight ? "-right-2 sm:-right-3" : "-left-2 sm:-left-3"
+      } ${isBottom ? "-bottom-2 sm:-bottom-3" : "-top-2 sm:-top-3"} ${className}`}
       style={{
-        transform: `${isLeft ? "scaleX(-1)" : ""} ${isBottom ? "scaleY(-1)" : ""}`,
+        transform,
+        transformOrigin: `${isRight ? "right" : "left"} ${isBottom ? "bottom" : "top"}`,
       }}
     >
       <img
         src="/images/realistic-corner-transparent.png"
         alt="Realistic Botanical Flower"
-        className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.22)]"
+        className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.2)]"
       />
     </motion.div>
   );

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
+import { RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 import { HelpCircle, ChevronDown, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -60,9 +60,6 @@ export default function WeddingFAQ() {
       <div className="absolute top-10 right-8 w-16 sm:w-20 pointer-events-none z-10 opacity-70">
         <FlyingDove direction="left" />
       </div>
-
-      <RealisticBotanicalImageCorner position="top-left" size="w-36 sm:w-48" className="opacity-80" />
-      <RealisticBotanicalImageCorner position="bottom-right" size="w-36 sm:w-48" className="opacity-80" />
 
       <div className="max-w-3xl mx-auto relative z-10">
         <MotionReveal direction="up" className="text-center mb-10 sm:mb-12">

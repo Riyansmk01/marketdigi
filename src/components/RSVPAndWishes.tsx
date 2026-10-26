@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
+import { RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 import { Send, CheckCircle2, XCircle, HelpCircle, MessageSquareHeart, Users, ThumbsUp, Sparkles } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -167,9 +167,6 @@ export default function RSVPAndWishes() {
         <FlyingDove direction="right" />
       </div>
 
-      <RealisticBotanicalImageCorner position="top-left" size="w-36 sm:w-56" className="opacity-80" />
-      <RealisticBotanicalImageCorner position="bottom-right" size="w-36 sm:w-56" className="opacity-80" />
-
       <div className="max-w-4xl mx-auto relative z-10">
         <MotionReveal direction="up" className="text-center mb-10">
           <p className="text-pink-800 uppercase tracking-[0.3em] text-xs font-semibold mb-2">
@@ -218,7 +215,6 @@ export default function RSVPAndWishes() {
           {/* RSVP Form */}
           <MotionReveal direction="right" delay={0.15}>
             <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border-2 border-pink-200 shadow-xl shadow-pink-900/10 relative overflow-hidden">
-              <RealisticBotanicalImageCorner position="top-right" size="w-24 sm:w-32" className="opacity-80" />
               <h3 className="text-xl font-serif text-stone-900 font-semibold mb-6 flex items-center gap-2">
                 <MessageSquareHeart className="w-5 h-5 text-pink-600" />
                 <span>Kirim Konfirmasi &amp; Doa</span>
@@ -336,7 +332,6 @@ export default function RSVPAndWishes() {
           {/* Guestbook Wishes Stream with Tabs */}
           <MotionReveal direction="left" delay={0.2}>
             <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border-2 border-pink-200 shadow-xl shadow-pink-900/10 flex flex-col h-[520px] relative overflow-hidden">
-              <RealisticBotanicalImageCorner position="bottom-right" size="w-24 sm:w-32" className="opacity-80" />
               <div className="flex items-center justify-between mb-3 pb-3 border-b border-stone-100">
                 <h3 className="text-xl font-serif text-stone-900 font-semibold">
                   Buku Tamu &amp; Doa

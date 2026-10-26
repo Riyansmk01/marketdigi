@@ -2,7 +2,7 @@
 
 import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { RealisticCornerBouquet, RealisticHeaderGarland, RealisticBotanicalImageCorner } from "@/components/ui/RealisticFloralAccent";
+import { RealisticCornerBouquet, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 
 function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -41,10 +41,6 @@ export default function CoupleSectionRenaissance() {
         <FlyingDove direction="left" delay={1.6} />
       </div>
 
-      {/* Realistic Corner Bouquets for the section */}
-      <RealisticCornerBouquet position="top-left" scale={0.85} />
-      <RealisticCornerBouquet position="bottom-right" scale={0.85} />
-
       <div className="max-w-4xl mx-auto text-center relative z-10">
         {/* Intro Salutation (Exact Replica of Image 5) */}
         <MotionReveal direction="up" className="mb-12 sm:mb-16">
@@ -59,9 +55,6 @@ export default function CoupleSectionRenaissance() {
           {/* Mempelai Pria */}
           <MotionReveal direction="right" delay={0.1}>
             <div className="flex flex-col items-center p-6 sm:p-8 bg-white/85 backdrop-blur-sm rounded-[36px] border-2 border-pink-200 shadow-xl shadow-pink-900/5 relative overflow-hidden">
-              <RealisticBotanicalImageCorner position="top-left" size="w-20 sm:w-28" className="opacity-75" />
-              <RealisticBotanicalImageCorner position="bottom-right" size="w-20 sm:w-28" className="opacity-75" />
-
               {/* Oval Frame with Cascading Realistic Watercolor Florals (Exact Replica of Image 5) */}
               <div className="relative mb-6">
                 {/* Oval Golden Window Frame */}
@@ -75,10 +68,8 @@ export default function CoupleSectionRenaissance() {
                   />
                 </div>
 
-                {/* Left Realistic Floral Bouquet Accent */}
-                <RealisticCornerBouquet position="top-left" scale={0.7} className="z-20 -top-8 -left-8" />
-                {/* Right Bottom Realistic Floral Bouquet Accent */}
-                <RealisticCornerBouquet position="bottom-right" scale={0.7} className="z-20 -bottom-8 -right-8" />
+                {/* Left Realistic Floral Bouquet Accent on Oval Frame */}
+                <RealisticCornerBouquet position="top-left" scale={0.7} className="z-20 -top-5 -left-5" />
               </div>
 
               {/* Cursive Name Accent (Exact Replica of 'Mega' in Image 5 -> 'Riyan') */}
@@ -113,9 +104,6 @@ export default function CoupleSectionRenaissance() {
           {/* Mempelai Wanita */}
           <MotionReveal direction="left" delay={0.15}>
             <div className="flex flex-col items-center p-6 sm:p-8 bg-white/85 backdrop-blur-sm rounded-[36px] border-2 border-pink-200 shadow-xl shadow-pink-900/5 relative overflow-hidden">
-              <RealisticBotanicalImageCorner position="top-right" size="w-20 sm:w-28" className="opacity-75" />
-              <RealisticBotanicalImageCorner position="bottom-left" size="w-20 sm:w-28" className="opacity-75" />
-
               {/* Oval Frame with Cascading Realistic Watercolor Florals (Exact Replica of Image 5) */}
               <div className="relative mb-6">
                 {/* Oval Golden Window Frame */}
@@ -129,10 +117,8 @@ export default function CoupleSectionRenaissance() {
                   />
                 </div>
 
-                {/* Left Realistic Floral Bouquet Accent */}
-                <RealisticCornerBouquet position="top-left" scale={0.7} className="z-20 -top-8 -left-8" />
-                {/* Right Bottom Realistic Floral Bouquet Accent */}
-                <RealisticCornerBouquet position="bottom-right" scale={0.7} className="z-20 -bottom-8 -right-8" />
+                {/* Right Realistic Floral Bouquet Accent on Oval Frame */}
+                <RealisticCornerBouquet position="top-right" scale={0.7} className="z-20 -top-5 -right-5" />
               </div>
 
               {/* Cursive Name Accent (Exact Replica of 'Mega' in Image 5 -> 'Intan') */}

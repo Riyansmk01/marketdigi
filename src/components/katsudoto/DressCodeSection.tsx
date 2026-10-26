@@ -2,7 +2,7 @@
 
 import React from "react";
 import MotionReveal from "@/components/ui/MotionReveal";
-import { RealisticBotanicalImageCorner, RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
+import { RealisticHeaderGarland } from "@/components/ui/RealisticFloralAccent";
 import { FlyingDove } from "@/components/ui/DimensionalBotanicals";
 import { Shirt, Clock3, HeartHandshake, Sparkles } from "lucide-react";
 
@@ -27,9 +27,6 @@ export default function DressCodeSection() {
       <div className="absolute top-8 right-8 w-16 sm:w-20 pointer-events-none z-10 opacity-70">
         <FlyingDove direction="left" />
       </div>
-
-      <RealisticBotanicalImageCorner position="top-right" size="w-32 sm:w-44" className="opacity-80" />
-      <RealisticBotanicalImageCorner position="bottom-left" size="w-32 sm:w-44" className="opacity-80" />
 
       <div className="max-w-3xl mx-auto text-center relative z-10">
         <MotionReveal direction="up">
