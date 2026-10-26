@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: var(--font-playfair), Georgia, serif;
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+  --font-cursive: var(--font-vibes), cursive;
+
+  --color-gold-50: #fbf8ef;
+  --color-gold-100: #f6efd5;
+  --color-gold-200: #ecdda9;
+  --color-gold-300: #dfc476;
+  --color-gold-400: #d1a845;
+  --color-gold-500: #be9027;
+  --color-gold-600: #a1731d;
+  --color-gold-700: #7d541a;
+  --color-gold-800: #66431c;
+  --color-gold-900: #57371c;
+}
+
+/* Custom wedding aesthetic helper utilities */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #faf7f2;
+  color: #292524;
+}
+
+.font-serif-title {
+  font-family: var(--font-serif);
+}
+
+.font-cursive-accent {
+  font-family: var(--font-cursive);
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
